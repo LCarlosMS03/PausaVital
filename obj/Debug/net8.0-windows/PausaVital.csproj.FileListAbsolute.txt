@@ -1,0 +1,9 @@
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital_MarkupCompile.cache
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\Views\MainWindow.baml
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\Views\MainWindow.g.cs
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\App.g.cs
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.g.resources
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.AssemblyInfoInputs.cache
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.AssemblyInfo.cs
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.csproj.CoreCompileInputs.cache
