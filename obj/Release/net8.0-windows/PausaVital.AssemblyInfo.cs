@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PausaVital")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b165c4516f328504bc05bcb3a6d175ba49fd119a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af68472085d1f819b4ad925bd6e453ddff626495")]
 [assembly: System.Reflection.AssemblyProductAttribute("PausaVital")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PausaVital")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

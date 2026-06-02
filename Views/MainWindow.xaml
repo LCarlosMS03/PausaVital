@@ -28,6 +28,14 @@
                        HorizontalAlignment="Center"
                        Margin="0,0,0,30"
                        Foreground="Gray"/>
+			
+			<TextBlock Name="IdleTimeText"
+					   Text="Idle Time: 0 seconds"
+					   FontSize="16"
+					   FontWeight="Bold"
+					   HorizontalAlignment="Center"
+					   Margin="0,0,0,30"
+			           Foreground="#333333"/>
 
 			<Button Name="HideToTrayButton"
                     Content="Hide to System Tray"
