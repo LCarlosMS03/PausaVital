@@ -20,7 +20,14 @@
 			<TextBlock Text="Current Streak: 0 Days"
                        FontSize="20"
                        HorizontalAlignment="Center"
-                       Margin="0,0,0,30"/>
+                       Margin="0,0,0,10"/>
+
+			<TextBlock Name="ConnectionStatusText"
+                       Text="Checking connection..."
+                       FontSize="14"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,30"
+                       Foreground="Gray"/>
 
 			<Button Name="HideToTrayButton"
                     Content="Hide to System Tray"

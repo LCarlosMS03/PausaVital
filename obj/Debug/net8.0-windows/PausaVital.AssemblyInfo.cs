@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PausaVital")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+297a7f987d1ced40602434a83eb00672b2d5c0ac")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b165c4516f328504bc05bcb3a6d175ba49fd119a")]
 [assembly: System.Reflection.AssemblyProductAttribute("PausaVital")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PausaVital")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

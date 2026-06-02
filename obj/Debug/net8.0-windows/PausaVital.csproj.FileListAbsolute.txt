@@ -7,3 +7,14 @@ C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital
 C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.AssemblyInfoInputs.cache
 C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.AssemblyInfo.cs
 C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.csproj.CoreCompileInputs.cache
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.sourcelink.json
+C:\Users\luisc\Desktop\PausaVital\PausaVital\bin\Debug\net8.0-windows\PausaVital.exe
+C:\Users\luisc\Desktop\PausaVital\PausaVital\bin\Debug\net8.0-windows\PausaVital.deps.json
+C:\Users\luisc\Desktop\PausaVital\PausaVital\bin\Debug\net8.0-windows\PausaVital.runtimeconfig.json
+C:\Users\luisc\Desktop\PausaVital\PausaVital\bin\Debug\net8.0-windows\PausaVital.dll
+C:\Users\luisc\Desktop\PausaVital\PausaVital\bin\Debug\net8.0-windows\PausaVital.pdb
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.dll
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\refint\PausaVital.dll
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.pdb
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\PausaVital.genruntimeconfig.cache
+C:\Users\luisc\Desktop\PausaVital\PausaVital\obj\Debug\net8.0-windows\ref\PausaVital.dll
