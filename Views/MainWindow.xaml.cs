@@ -8,26 +8,42 @@ namespace PausaVital.Views
     public partial class MainWindow : Window
     {
         private readonly ApiService apiService;
+        private readonly BackendProcessManager backendProcessManager;
         private readonly DispatcherTimer idleTimer;
+        private readonly BreakManager breakManager;
+        private DateTime lastTickTime = DateTime.UtcNow;
 
         public MainWindow()
         {
             InitializeComponent();
+
             apiService = new ApiService();
+            backendProcessManager = new BackendProcessManager(apiService);
+            breakManager = new BreakManager();
 
-            VerifyBackendConnection();
+            Loaded += OnMainWindowLoaded;
+            Closed += OnMainWindowClosed;
 
-            // Configuramos el reloj para que "haga tic" cada 1 segundo
-            idleTimer = new DispatcherTimer();
-            idleTimer.Interval = TimeSpan.FromSeconds(1);
+            // Setup timer to tick every 1 second.
+            idleTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
             idleTimer.Tick += OnIdleTimerTicked;
             idleTimer.Start();
         }
 
-        private async void VerifyBackendConnection()
+        private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            bool isConnected = await apiService.CheckHealthAsync();
+            ConnectionStatusText.Text = "Backend: Starting...";
+            ConnectionStatusText.Foreground = System.Windows.Media.Brushes.Goldenrod;
 
+            bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
+            UpdateConnectionStatus(isConnected);
+        }
+
+        private void UpdateConnectionStatus(bool isConnected)
+        {
             if (isConnected)
             {
                 ConnectionStatusText.Text = "Backend: Connected";
@@ -42,16 +58,32 @@ namespace PausaVital.Views
 
         private void OnIdleTimerTicked(object? sender, EventArgs e)
         {
-            // Le preguntamos al monitor nativo de Windows el tiempo inactivo
-            TimeSpan idleTime = ActivityMonitor.GetIdleTime();
+            DateTime now = DateTime.UtcNow;
+            TimeSpan elapsed = now - lastTickTime;
+            lastTickTime = now;
 
-            // Actualizamos la ventana (F0 quita los decimales)
+            // Get idle time from Windows.
+            TimeSpan idleTime = ActivityMonitor.GetIdleTime();
             IdleTimeText.Text = $"Idle Time: {idleTime.TotalSeconds:F0} seconds";
+
+            // Check if it's time for a 20-20-20 break.
+            if (breakManager.ShouldTakeBreak(idleTime, elapsed))
+            {
+                App.TrayManager?.ShowNotification(
+                    "20-20-20 Rule",
+                    "Look at something 20 feet away for 20 seconds!");
+            }
         }
 
         private void OnHideToTrayButtonClicked(object sender, RoutedEventArgs e)
         {
-            this.Hide();
+            Hide();
+        }
+
+        private void OnMainWindowClosed(object? sender, EventArgs e)
+        {
+            idleTimer.Stop();
+            backendProcessManager.Dispose();
         }
     }
 }

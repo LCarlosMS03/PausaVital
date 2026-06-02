@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# PausaVital backend/local data
+Backend/venv/
+Backend/__pycache__/
+Backend/*.sqlite

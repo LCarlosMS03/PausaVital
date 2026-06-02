@@ -1,8 +1,13 @@
+from pathlib import Path
 import sqlite3
 
+DATABASE_PATH = Path(__file__).resolve().parent / "pausavital_db.sqlite"
+
+
 def get_db_connection():
-    connection = sqlite3.connect("pausavital_db.sqlite", check_same_thread=False)
+    connection = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
     return connection
+
 
 def initialize_database():
     connection = get_db_connection()
@@ -32,6 +37,16 @@ def initialize_database():
             user_id INTEGER PRIMARY KEY,
             available_shields INTEGER NOT NULL
         )
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_event_logs_habit_id
+        ON event_logs(habit_id)
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_event_logs_completed_at
+        ON event_logs(completed_at)
     """)
 
     connection.commit()

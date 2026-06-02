@@ -6,7 +6,7 @@ namespace PausaVital
 {
     public partial class App : System.Windows.Application
     {
-        private TrayIconManager? trayManager;
+        public static TrayIconManager? TrayManager { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -14,14 +14,15 @@ namespace PausaVital
 
             MainWindow appWindow = new MainWindow();
 
-            trayManager = new TrayIconManager(appWindow);
+            TrayManager = new TrayIconManager(appWindow);
 
             appWindow.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            trayManager?.Dispose();
+            TrayManager?.Dispose();
+            TrayManager = null;
             base.OnExit(e);
         }
     }

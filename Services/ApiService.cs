@@ -6,20 +6,19 @@ namespace PausaVital.Services
 {
     public class ApiService
     {
-        private readonly HttpClient httpClient;
         private const string BaseUrl = "http://127.0.0.1:8000";
 
-        public ApiService()
+        private static readonly HttpClient HttpClient = new HttpClient
         {
-            httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(BaseUrl);
-        }
+            BaseAddress = new Uri(BaseUrl),
+            Timeout = TimeSpan.FromSeconds(3)
+        };
 
         public async Task<bool> CheckHealthAsync()
         {
             try
             {
-                HttpResponseMessage response = await httpClient.GetAsync("/health");
+                using HttpResponseMessage response = await HttpClient.GetAsync("/health");
                 return response.IsSuccessStatusCode;
             }
             catch
