@@ -64,7 +64,7 @@ namespace PausaVital.Views
 
             // Get idle time from Windows.
             TimeSpan idleTime = ActivityMonitor.GetIdleTime();
-            IdleTimeText.Text = $"Idle Time: {idleTime.TotalSeconds:F0} seconds";
+            IdleTimeText.Text = $"Idle Time: {idleTime.TotalSeconds:F0} segundos";
 
             // Check if it's time for a 20-20-20 break.
             if (breakManager.ShouldTakeBreak(idleTime, elapsed))
