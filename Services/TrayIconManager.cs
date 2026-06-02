@@ -23,7 +23,7 @@ namespace PausaVital.Services
             showMenuItem.Click += (s, e) => ShowDashboard();
 
             var statsMenuItem = new ToolStripMenuItem("Advanced Statistics");
-            statsMenuItem.Click += (s, e) => ShowNotification("Coming Soon", "Advanced statistics will be available in the next update.");
+            statsMenuItem.Click += (s, e) => ShowStatisticsWindow();
 
             var exitMenuItem = new ToolStripMenuItem("Exit Pausa Vital");
             exitMenuItem.Click += (s, e) => ExitApplication();
@@ -40,6 +40,21 @@ namespace PausaVital.Services
             systemTrayIcon.ContextMenuStrip = contextMenu;
 
             systemTrayIcon.DoubleClick += (s, e) => ShowDashboard();
+        }
+
+        private void ShowStatisticsWindow()
+        {
+            if (dashboardWindow is PausaVital.Views.MainWindow mainWindow)
+            {
+                if (mainWindow.currentUserId == 0)
+                {
+                    ShowNotification("Not Ready", "Please wait for the backend to connect.");
+                    return;
+                }
+
+                var statsWindow = new PausaVital.Views.StatisticsWindow(mainWindow.currentUserId);
+                statsWindow.ShowDialog(); // ShowDialog prevents clicking the main window until closed
+            }
         }
 
         public void UpdateText(string text)
@@ -63,16 +78,13 @@ namespace PausaVital.Services
             dashboardWindow.Activate();
         }
 
-        // NEW: Safely authorize and trigger the shutdown
         private void ExitApplication()
         {
-            // Authorize the main window to close
             if (dashboardWindow is PausaVital.Views.MainWindow mainWindow)
             {
                 mainWindow.IsShuttingDown = true;
             }
 
-            // Trigger shutdown
             System.Windows.Application.Current.Shutdown();
         }
 

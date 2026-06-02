@@ -154,6 +154,28 @@ def consume_shield(user_id: int):
     conn.close()
     return {"success": True, "available_shields": new_amount}
 
+@app.get("/stats/{user_id}")
+def get_user_stats(user_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM event_logs WHERE user_id = ? AND status = 'completed'", (user_id,))
+    completed = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM event_logs WHERE user_id = ? AND status = 'failed'", (user_id,))
+    failed = cursor.fetchone()[0]
+    
+    conn.close()
+    
+    total = completed + failed
+    success_rate = (completed / total * 100) if total > 0 else 0
+    
+    return {
+        "total_completed": completed,
+        "total_failed": failed,
+        "success_rate": round(success_rate, 1)
+    }
+
 # Run the app
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

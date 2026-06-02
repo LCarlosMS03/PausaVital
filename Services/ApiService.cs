@@ -124,5 +124,26 @@ namespace PausaVital.Services
             catch { }
             return false;
         }
+
+        public async Task<(int completed, int failed, double successRate)?> GetUserStatsAsync(int userId)
+        {
+            try
+            {
+                using HttpResponseMessage response = await HttpClient.GetAsync($"/stats/{userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(jsonResponse);
+
+                    int comp = doc.RootElement.GetProperty("total_completed").GetInt32();
+                    int fail = doc.RootElement.GetProperty("total_failed").GetInt32();
+                    double rate = doc.RootElement.GetProperty("success_rate").GetDouble();
+
+                    return (comp, fail, rate);
+                }
+            }
+            catch { }
+            return null;
+        }
     }
 }

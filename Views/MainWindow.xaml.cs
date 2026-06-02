@@ -18,7 +18,7 @@ namespace PausaVital.Views
         private int restSecondsRemaining = 0;
         private const int RestDurationSeconds = 20;
 
-        private int currentUserId = 0;
+        public int currentUserId { get; private set; } = 0;
         private int currentHabitId = 0;
 
         private int cachedStreak = 0;
@@ -26,6 +26,7 @@ namespace PausaVital.Views
 
         // NEW: Flag to check if we are really shutting down
         public bool IsShuttingDown { get; set; } = false;
+        private bool hasShownMinimizeNotification = false;
 
         public MainWindow()
         {
@@ -50,7 +51,6 @@ namespace PausaVital.Views
             idleTimer.Start();
         }
 
-        // NEW: Hide window if minimized
         private void OnWindowStateChanged(object? sender, EventArgs e)
         {
             if (WindowState == WindowState.Minimized)
@@ -59,15 +59,18 @@ namespace PausaVital.Views
             }
         }
 
-        // NEW: Intercept the 'X' button
         private void OnMainWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            // If it's not a real shutdown from the Tray Icon, cancel it and hide
             if (!IsShuttingDown)
             {
                 e.Cancel = true;
                 Hide();
-                App.TrayManager?.ShowNotification("Pausa Vital", "Running in background. Right-click tray icon to exit.");
+
+                if (!hasShownMinimizeNotification)
+                {
+                    App.TrayManager?.ShowNotification("Pausa Vital", "Running in background. Right-click tray icon to exit.");
+                    hasShownMinimizeNotification = true;
+                }
             }
         }
 
