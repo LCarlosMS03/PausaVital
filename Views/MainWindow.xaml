@@ -17,7 +17,8 @@
                    HorizontalAlignment="Center"/>
 
 		<StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-			<TextBlock Text="Current Streak: 0 Days"
+	<TextBlock Name="StreakText"
+			   Text="Current Streak: 0 Breaks"
                        FontSize="20"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,10"/>
