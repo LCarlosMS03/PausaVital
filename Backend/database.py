@@ -3,15 +3,21 @@ import sqlite3
 
 DATABASE_PATH = Path(__file__).resolve().parent / "pausavital_db.sqlite"
 
-
 def get_db_connection():
     connection = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
     return connection
 
-
 def initialize_database():
     connection = get_db_connection()
     cursor = connection.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            shields INTEGER NOT NULL DEFAULT 0
+        )
+    """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS habits (
@@ -22,31 +28,23 @@ def initialize_database():
         )
     """)
 
+    cursor.execute("SELECT COUNT(*) FROM habits")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("""
+            INSERT INTO habits (title, category, periodicity) 
+            VALUES ('Regla 20-20-20', 'Salud Visual', '20m')
+        """)
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS event_logs (
             log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            habit_id INTEGER,
+            user_id INTEGER NOT NULL,
+            habit_id INTEGER NOT NULL,
             completed_at TIMESTAMP NOT NULL,
             status TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id),
             FOREIGN KEY (habit_id) REFERENCES habits(id)
         )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_shields (
-            user_id INTEGER PRIMARY KEY,
-            available_shields INTEGER NOT NULL
-        )
-    """)
-
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_event_logs_habit_id
-        ON event_logs(habit_id)
-    """)
-
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_event_logs_completed_at
-        ON event_logs(completed_at)
     """)
 
     connection.commit()

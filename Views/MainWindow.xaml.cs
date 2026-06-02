@@ -14,6 +14,15 @@ namespace PausaVital.Views
         private readonly BreakManager breakManager;
         private DateTime lastTickTime = DateTime.UtcNow;
 
+        // Gamification Variables
+        private bool isResting = false;
+        private int restSecondsRemaining = 0;
+        private const int RestDurationSeconds = 20;
+
+        // Dynamic Profile Variables
+        private int currentUserId = 0;
+        private int currentHabitId = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -49,7 +58,11 @@ namespace PausaVital.Views
                 ConnectionStatusText.Text = "Backend: Connected";
                 ConnectionStatusText.Foreground = System.Windows.Media.Brushes.Green;
 
-                await UpdateStreakDisplayAsync();
+                // Initialize Dynamic Profile using Windows Session Name
+                currentUserId = await apiService.LoginAsync(Environment.UserName);
+                currentHabitId = await apiService.GetDefaultHabitAsync();
+
+                await UpdateStreakAndShieldsAsync();
             }
             else
             {
@@ -58,10 +71,15 @@ namespace PausaVital.Views
             }
         }
 
-        private async Task UpdateStreakDisplayAsync()
+        private async Task UpdateStreakAndShieldsAsync()
         {
-            int streak = await apiService.GetCurrentStreakAsync();
+            if (currentUserId == 0) return;
+
+            int streak = await apiService.GetCurrentStreakAsync(currentUserId);
             StreakText.Text = $"Current Streak: {streak} Breaks";
+
+            int shields = await apiService.GetShieldsAsync(currentUserId);
+            ShieldsText.Text = $"Shields: {shields}";
         }
 
         private async void OnIdleTimerTicked(object? sender, EventArgs e)
@@ -73,30 +91,88 @@ namespace PausaVital.Views
             TimeSpan idleTime = ActivityMonitor.GetIdleTime();
             IdleTimeText.Text = $"Idle Time: {idleTime.TotalSeconds:F0} seconds";
 
+            if (isResting)
+            {
+                if (idleTime.TotalSeconds < 1.0)
+                {
+                    await HandleFailedRestAsync();
+                }
+                else
+                {
+                    restSecondsRemaining--;
+                    RestStatusText.Text = $"RESTING... DO NOT MOVE! ({restSecondsRemaining}s)";
+
+                    if (restSecondsRemaining <= 0)
+                    {
+                        await HandleSuccessfulRestAsync();
+                    }
+                }
+                return;
+            }
+
             TimeSpan currentWork = breakManager.WorkTime;
             WorkTimeText.Text = $"Work Time: {currentWork.Minutes:D2}:{currentWork.Seconds:D2}";
 
             if (breakManager.ShouldTakeBreak(idleTime, elapsed))
             {
-                App.TrayManager?.ShowNotification(
-                    "20-20-20 Rule",
-                    "Look at something 20 feet away for 20 seconds!");
-
-                bool recorded = await apiService.RecordBreakAsync(1);
-                if (recorded)
-                {
-                    await UpdateStreakDisplayAsync();
-                }
+                StartRestMode();
             }
         }
 
-        private async void OnTestBreakButtonClicked(object sender, RoutedEventArgs e)
+        private void StartRestMode()
         {
-            bool recorded = await apiService.RecordBreakAsync(1);
+            isResting = true;
+            restSecondsRemaining = RestDurationSeconds;
+
+            RestStatusText.Visibility = Visibility.Visible;
+            RestStatusText.Text = $"RESTING... DO NOT MOVE! ({restSecondsRemaining}s)";
+            RestStatusText.Foreground = System.Windows.Media.Brushes.DarkOrange;
+
+            App.TrayManager?.ShowNotification(
+                "20-20-20 Rule",
+                $"Look away for {RestDurationSeconds} seconds! Do not touch the mouse or keyboard.");
+        }
+
+        private async Task HandleSuccessfulRestAsync()
+        {
+            isResting = false;
+            RestStatusText.Visibility = Visibility.Collapsed;
+
+            bool recorded = await apiService.RecordBreakAsync(currentUserId, currentHabitId, "completed");
             if (recorded)
             {
-                await UpdateStreakDisplayAsync();
-                App.TrayManager?.ShowNotification("Test Mode", "Break recorded successfully via test button!");
+                await UpdateStreakAndShieldsAsync();
+                App.TrayManager?.ShowNotification("Break Completed", "Great job! Streak updated.");
+            }
+        }
+
+        private async Task HandleFailedRestAsync()
+        {
+            isResting = false;
+
+            bool shieldConsumed = await apiService.ConsumeShieldAsync(currentUserId);
+
+            if (shieldConsumed)
+            {
+                RestStatusText.Text = "STREAK SAVED BY SHIELD!";
+                RestStatusText.Foreground = System.Windows.Media.Brushes.DodgerBlue;
+                App.TrayManager?.ShowNotification("Shield Used!", "You moved, but a shield saved your streak!");
+            }
+            else
+            {
+                RestStatusText.Text = "STREAK BROKEN!";
+                RestStatusText.Foreground = System.Windows.Media.Brushes.Red;
+                App.TrayManager?.ShowNotification("Streak Broken", "You moved before the 20 seconds were up!");
+
+                await apiService.RecordBreakAsync(currentUserId, currentHabitId, "failed");
+            }
+
+            await UpdateStreakAndShieldsAsync();
+
+            await Task.Delay(3000);
+            if (!isResting)
+            {
+                RestStatusText.Visibility = Visibility.Collapsed;
             }
         }
 

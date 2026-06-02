@@ -23,6 +23,15 @@
                        FontSize="20"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,10"/>
+			
+			<TextBlock Name="ShieldsText"
+					   Text="Shield: 0"
+					   FontSize="16"
+					   Foreground="Goldenrod"
+					   FontWeight="SemiBold"
+					   HorizontalAlignment="Center"
+					   Margin="0,0,0,15"/>
+					   
 
 			<TextBlock Name="ConnectionStatusText"
                        Text="Checking connection..."
@@ -30,6 +39,15 @@
                        HorizontalAlignment="Center"
                        Margin="0,0,0,30"
                        Foreground="Gray"/>
+			
+			<TextBlock Name="RestStatusText"
+                       Text=""
+                       FontSize="18"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,15"
+                       Foreground="DarkOrange"
+                       Visibility="Collapsed"/>
 			
 			<TextBlock Name="WorkTimeText"
 					   Text="Work Time: 00:00"
@@ -46,15 +64,6 @@
                        HorizontalAlignment="Center"
                        Margin="0,0,0,30"
                        Foreground="#333333"/>
-
-			<Button Name="TestBreakButton"
-                    Content="[TEST] Simulate Break"
-                    Width="180"
-                    Height="35"
-                    FontSize="14"
-                    Margin="0,0,0,10"
-                    Background="LightCyan"
-                    Click="OnTestBreakButtonClicked"/>
 
 			<Button Name="HideToTrayButton"
                     Content="Hide to System Tray"
