@@ -29,16 +29,19 @@ namespace PausaVital.Services
                 return false;
             }
 
-            backendProcess = TryStartBackend(backendDirectory, "py", "-m uvicorn main:app --host 127.0.0.1 --port 8000");
-            backendProcess ??= TryStartBackend(backendDirectory, "python", "-m uvicorn main:app --host 127.0.0.1 --port 8000");
-            backendProcess ??= TryStartBackend(backendDirectory, "python3", "-m uvicorn main:app --host 127.0.0.1 --port 8000");
+            // Look exclusively for the compiled Python executable
+            string executablePath = Path.Combine(backendDirectory, "PausaVitalBackend.exe");
+
+            if (File.Exists(executablePath))
+            {
+                backendProcess = TryStartBackend(backendDirectory, executablePath, "");
+            }
 
             if (backendProcess is null)
             {
                 return false;
             }
 
-            // Give Uvicorn a short window to initialize before checking /health again.
             for (int attempt = 0; attempt < 10; attempt++)
             {
                 await Task.Delay(500);

@@ -42,7 +42,7 @@
 		<Border Grid.Row="2" Background="#E8ECEF">
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 				<Ellipse Name="ConnectionStatusDot" Width="8" Height="8" Fill="Goldenrod" Margin="0,0,6,0"/>
-				<TextBlock Name="ConnectionStatusText" Text="Starting backend..." FontSize="11" Foreground="#7F8C8D"/>
+				<TextBlock Name="ConnectionStatusText" Text="Connecting..." FontSize="11" Foreground="#7F8C8D"/>
 			</StackPanel>
 		</Border>
 	</Grid>

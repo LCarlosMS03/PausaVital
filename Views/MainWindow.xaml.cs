@@ -73,7 +73,7 @@ namespace PausaVital.Views
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            UpdateConnectionUI("Starting backend...", System.Windows.Media.Brushes.Goldenrod);
+            UpdateConnectionUI("Starting connection...", System.Windows.Media.Brushes.Goldenrod);
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
             UpdateConnectionStatus(isConnected);
         }
@@ -88,7 +88,7 @@ namespace PausaVital.Views
         {
             if (isConnected)
             {
-                UpdateConnectionUI("Backend connected", System.Windows.Media.Brushes.MediumSeaGreen);
+                UpdateConnectionUI("Connected", System.Windows.Media.Brushes.MediumSeaGreen);
 
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
                 currentHabitId = await apiService.GetDefaultHabitAsync();
@@ -96,7 +96,7 @@ namespace PausaVital.Views
             }
             else
             {
-                UpdateConnectionUI("Backend offline", System.Windows.Media.Brushes.IndianRed);
+                UpdateConnectionUI("Disconnected", System.Windows.Media.Brushes.IndianRed);
             }
         }
 

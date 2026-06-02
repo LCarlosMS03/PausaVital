@@ -1,9 +1,63 @@
+import sqlite3
+import sys
+from pathlib import Path
+import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
-from database import initialize_database, get_db_connection
 
+# DATA BASE
+if getattr(sys, 'frozen', False):
+    application_path = Path(sys.executable).parent
+else:
+    application_path = Path(__file__).resolve().parent
+
+DATABASE_PATH = application_path / "pausavital_db.sqlite"
+
+def get_db_connection():
+    return sqlite3.connect(DATABASE_PATH, check_same_thread=False)
+
+def initialize_database():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            shields INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS habits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            category TEXT NOT NULL,
+            periodicity TEXT NOT NULL
+        )
+    """)
+    cursor.execute("SELECT COUNT(*) FROM habits")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("""
+            INSERT INTO habits (title, category, periodicity) 
+            VALUES ('Regla 20-20-20', 'Salud Visual', '20m')
+        """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS event_logs (
+            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            habit_id INTEGER NOT NULL,
+            completed_at TIMESTAMP NOT NULL,
+            status TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (habit_id) REFERENCES habits(id)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+# LOCAL API
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     initialize_database()
@@ -23,17 +77,13 @@ class BreakLog(BaseModel):
 def check_health():
     return {"status": "ok", "service": "PausaVital Backend"}
 
-# Endpoint para Auto-Login con Windows
 @app.post("/auth/login")
 def login(req: LoginRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
-    
     cursor.execute("SELECT id, username, shields FROM users WHERE username = ?", (req.username,))
     row = cursor.fetchone()
-    
     if row is None:
-        # Crea el usuario automáticamente si no existe
         cursor.execute("INSERT INTO users (username, shields) VALUES (?, 0)", (req.username,))
         conn.commit()
         user_id = cursor.lastrowid
@@ -41,7 +91,6 @@ def login(req: LoginRequest):
     else:
         user_id = row[0]
         shields = row[2]
-        
     conn.close()
     return {"user_id": user_id, "username": req.username, "shields": shields}
 
@@ -73,12 +122,10 @@ def get_current_streak(user_id: int):
     cursor = conn.cursor()
     cursor.execute("SELECT completed_at FROM event_logs WHERE user_id = ? AND status = 'failed' ORDER BY completed_at DESC LIMIT 1", (user_id,))
     last_fail = cursor.fetchone()
-    
     if last_fail:
         cursor.execute("SELECT COUNT(*) FROM event_logs WHERE user_id = ? AND status = 'completed' AND completed_at > ?", (user_id, last_fail[0]))
     else:
         cursor.execute("SELECT COUNT(*) FROM event_logs WHERE user_id = ? AND status = 'completed'", (user_id,))
-        
     count = cursor.fetchone()[0]
     conn.close()
     return {"current_streak": count}
@@ -98,13 +145,15 @@ def consume_shield(user_id: int):
     cursor = conn.cursor()
     cursor.execute("SELECT shields FROM users WHERE id = ?", (user_id,))
     row = cursor.fetchone()
-    
     if row is None or row[0] <= 0:
         conn.close()
         return {"success": False}
-        
     new_amount = row[0] - 1
     cursor.execute("UPDATE users SET shields = ? WHERE id = ?", (new_amount, user_id))
     conn.commit()
     conn.close()
     return {"success": True, "available_shields": new_amount}
+
+# Run the app
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)
