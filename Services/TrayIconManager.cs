@@ -73,6 +73,7 @@ namespace PausaVital.Services
 
         private void ShowDashboard()
         {
+            dashboardWindow.ShowInTaskbar = true;
             dashboardWindow.Show();
             dashboardWindow.WindowState = WindowState.Normal;
             dashboardWindow.Activate();

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Windows;
 using PausaVital.Services;
 using PausaVital.Views;
@@ -14,26 +15,36 @@ namespace PausaVital
         protected override void OnStartup(StartupEventArgs e)
         {
             const string mutexName = "PausaVital_SingleInstance_Mutex";
-            bool createdNew;
-
-            appMutex = new Mutex(true, mutexName, out createdNew);
+            appMutex = new Mutex(true, mutexName, out bool createdNew);
 
             if (!createdNew)
             {
                 System.Windows.MessageBox.Show("Pausa Vital is already running in the background. Check your System Tray.",
-                                "Pausa Vital",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Information);
-
+                                "Pausa Vital", MessageBoxButton.OK, MessageBoxImage.Information);
                 Current.Shutdown();
                 return;
             }
 
             base.OnStartup(e);
 
+            StartupManager.EnsureAutoStart();
+
+            bool startInBackground = e.Args.Contains("--background");
+
             MainWindow appWindow = new MainWindow();
             TrayManager = new TrayIconManager(appWindow);
-            appWindow.Show();
+
+            if (startInBackground)
+            {
+                appWindow.ShowInTaskbar = false;
+                appWindow.WindowState = WindowState.Minimized;
+                appWindow.Show(); 
+                appWindow.Hide(); 
+            }
+            else
+            {
+                appWindow.Show();
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
