@@ -70,8 +70,8 @@ namespace PausaVital.Views
             if (breakManager.ShouldTakeBreak(idleTime, elapsed))
             {
                 App.TrayManager?.ShowNotification(
-                    "20-20-20 Rule",
-                    "Look at something 20 feet away for 20 seconds!");
+                    "Regla 20-20-20",
+                    "Observa algo a 20 pies (6 metros) durante 20 segundos");
             }
         }
 
