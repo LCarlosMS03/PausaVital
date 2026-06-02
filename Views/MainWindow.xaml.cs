@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using PausaVital.Services;
@@ -24,7 +25,6 @@ namespace PausaVital.Views
             Loaded += OnMainWindowLoaded;
             Closed += OnMainWindowClosed;
 
-            // Setup timer to tick every 1 second.
             idleTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
@@ -42,12 +42,14 @@ namespace PausaVital.Views
             UpdateConnectionStatus(isConnected);
         }
 
-        private void UpdateConnectionStatus(bool isConnected)
+        private async void UpdateConnectionStatus(bool isConnected)
         {
             if (isConnected)
             {
                 ConnectionStatusText.Text = "Backend: Connected";
                 ConnectionStatusText.Foreground = System.Windows.Media.Brushes.Green;
+
+                await UpdateStreakDisplayAsync();
             }
             else
             {
@@ -56,22 +58,45 @@ namespace PausaVital.Views
             }
         }
 
-        private void OnIdleTimerTicked(object? sender, EventArgs e)
+        private async Task UpdateStreakDisplayAsync()
+        {
+            int streak = await apiService.GetCurrentStreakAsync();
+            StreakText.Text = $"Current Streak: {streak} Breaks";
+        }
+
+        private async void OnIdleTimerTicked(object? sender, EventArgs e)
         {
             DateTime now = DateTime.UtcNow;
             TimeSpan elapsed = now - lastTickTime;
             lastTickTime = now;
 
-            // Get idle time from Windows.
             TimeSpan idleTime = ActivityMonitor.GetIdleTime();
-            IdleTimeText.Text = $"Idle Time: {idleTime.TotalSeconds:F0} segundos";
+            IdleTimeText.Text = $"Idle Time: {idleTime.TotalSeconds:F0} seconds";
 
-            // Check if it's time for a 20-20-20 break.
+            TimeSpan currentWork = breakManager.WorkTime;
+            WorkTimeText.Text = $"Work Time: {currentWork.Minutes:D2}:{currentWork.Seconds:D2}";
+
             if (breakManager.ShouldTakeBreak(idleTime, elapsed))
             {
                 App.TrayManager?.ShowNotification(
-                    "Regla 20-20-20",
-                    "Observa algo a 20 pies (6 metros) durante 20 segundos");
+                    "20-20-20 Rule",
+                    "Look at something 20 feet away for 20 seconds!");
+
+                bool recorded = await apiService.RecordBreakAsync(1);
+                if (recorded)
+                {
+                    await UpdateStreakDisplayAsync();
+                }
+            }
+        }
+
+        private async void OnTestBreakButtonClicked(object sender, RoutedEventArgs e)
+        {
+            bool recorded = await apiService.RecordBreakAsync(1);
+            if (recorded)
+            {
+                await UpdateStreakDisplayAsync();
+                App.TrayManager?.ShowNotification("Test Mode", "Break recorded successfully via test button!");
             }
         }
 

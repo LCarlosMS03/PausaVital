@@ -29,11 +29,11 @@ namespace PausaVital.Services
             }
         }
 
-        public async Task<bool> RecordBreakAsync(int habitId)
+        public async Task<bool> RecordBreakAsync(int habitId, string status = "completed")
         {
             try
             {
-                var payload = new { habit_id = habitId, status = "completed" };
+                var payload = new { habit_id = habitId, status = status };
                 string json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -60,9 +60,45 @@ namespace PausaVital.Services
             }
             catch
             {
-                // Return 0 if the backend is unreachable
             }
             return 0;
+        }
+
+        public async Task<int> GetShieldsAsync(int userId)
+        {
+            try
+            {
+                using HttpResponseMessage response = await HttpClient.GetAsync($"/shields/{userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(jsonResponse);
+                    return doc.RootElement.GetProperty("available_shields").GetInt32();
+                }
+            }
+            catch
+            {
+            }
+            return 0;
+        }
+
+        public async Task<bool> ConsumeShieldAsync(int userId)
+        {
+            try
+            {
+                var content = new StringContent("", Encoding.UTF8, "application/json");
+                using HttpResponseMessage response = await HttpClient.PostAsync($"/shields/{userId}/consume", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(jsonResponse);
+                    return doc.RootElement.GetProperty("success").GetBoolean();
+                }
+            }
+            catch
+            {
+            }
+            return false;
         }
     }
 }
