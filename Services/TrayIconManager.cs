@@ -21,7 +21,16 @@ namespace PausaVital.Services
 
             systemTrayIcon.DoubleClick += OnTrayIconDoubleClicked;
         }
-        
+
+        public void UpdateText(string text)
+        {
+            if (text.Length >= 63)
+            {
+                text = text.Substring(0, 63);
+            }
+            systemTrayIcon.Text = text;
+        }
+
         public void ShowNotification(string title, string message)
         {
             systemTrayIcon.ShowBalloonTip(3000, title, message, ToolTipIcon.Info);

@@ -14,14 +14,16 @@ namespace PausaVital.Views
         private readonly BreakManager breakManager;
         private DateTime lastTickTime = DateTime.UtcNow;
 
-        // Gamification Variables
         private bool isResting = false;
         private int restSecondsRemaining = 0;
         private const int RestDurationSeconds = 20;
 
-        // Dynamic Profile Variables
         private int currentUserId = 0;
         private int currentHabitId = 0;
+
+        // Cache to avoid querying API every second for TrayIcon text
+        private int cachedStreak = 0;
+        private int cachedShields = 0;
 
         public MainWindow()
         {
@@ -44,30 +46,31 @@ namespace PausaVital.Views
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            ConnectionStatusText.Text = "Backend: Starting...";
-            ConnectionStatusText.Foreground = System.Windows.Media.Brushes.Goldenrod;
-
+            UpdateConnectionUI("Starting backend...", System.Windows.Media.Brushes.Goldenrod);
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
             UpdateConnectionStatus(isConnected);
+        }
+
+        // Resolving the ambiguity by explicitly calling System.Windows.Media.Brush
+        private void UpdateConnectionUI(string text, System.Windows.Media.Brush color)
+        {
+            ConnectionStatusText.Text = text;
+            ConnectionStatusDot.Fill = color;
         }
 
         private async void UpdateConnectionStatus(bool isConnected)
         {
             if (isConnected)
             {
-                ConnectionStatusText.Text = "Backend: Connected";
-                ConnectionStatusText.Foreground = System.Windows.Media.Brushes.Green;
+                UpdateConnectionUI("Connected", System.Windows.Media.Brushes.MediumSeaGreen);
 
-                // Initialize Dynamic Profile using Windows Session Name
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
                 currentHabitId = await apiService.GetDefaultHabitAsync();
-
                 await UpdateStreakAndShieldsAsync();
             }
             else
             {
-                ConnectionStatusText.Text = "Backend: Disconnected";
-                ConnectionStatusText.Foreground = System.Windows.Media.Brushes.Red;
+                UpdateConnectionUI("Backend offline", System.Windows.Media.Brushes.IndianRed);
             }
         }
 
@@ -75,11 +78,11 @@ namespace PausaVital.Views
         {
             if (currentUserId == 0) return;
 
-            int streak = await apiService.GetCurrentStreakAsync(currentUserId);
-            StreakText.Text = $"Current Streak: {streak} Breaks";
+            cachedStreak = await apiService.GetCurrentStreakAsync(currentUserId);
+            StreakText.Text = $"🔥 Streak: {cachedStreak}";
 
-            int shields = await apiService.GetShieldsAsync(currentUserId);
-            ShieldsText.Text = $"Shields: {shields}";
+            cachedShields = await apiService.GetShieldsAsync(currentUserId);
+            ShieldsText.Text = $"🛡️ Shields: {cachedShields}";
         }
 
         private async void OnIdleTimerTicked(object? sender, EventArgs e)
@@ -89,7 +92,6 @@ namespace PausaVital.Views
             lastTickTime = now;
 
             TimeSpan idleTime = ActivityMonitor.GetIdleTime();
-            IdleTimeText.Text = $"Idle Time: {idleTime.TotalSeconds:F0} seconds";
 
             if (isResting)
             {
@@ -102,6 +104,8 @@ namespace PausaVital.Views
                     restSecondsRemaining--;
                     RestStatusText.Text = $"RESTING... DO NOT MOVE! ({restSecondsRemaining}s)";
 
+                    App.TrayManager?.UpdateText($"Resting: {restSecondsRemaining}s left");
+
                     if (restSecondsRemaining <= 0)
                     {
                         await HandleSuccessfulRestAsync();
@@ -111,7 +115,10 @@ namespace PausaVital.Views
             }
 
             TimeSpan currentWork = breakManager.WorkTime;
-            WorkTimeText.Text = $"Work Time: {currentWork.Minutes:D2}:{currentWork.Seconds:D2}";
+            WorkTimeText.Text = $"{currentWork.Minutes:D2}:{currentWork.Seconds:D2}";
+
+            string trayHoverText = $"Work: {currentWork.Minutes:D2}:{currentWork.Seconds:D2} | Streak: {cachedStreak}";
+            App.TrayManager?.UpdateText(trayHoverText);
 
             if (breakManager.ShouldTakeBreak(idleTime, elapsed))
             {
@@ -154,7 +161,7 @@ namespace PausaVital.Views
 
             if (shieldConsumed)
             {
-                RestStatusText.Text = "STREAK SAVED BY SHIELD!";
+                RestStatusText.Text = "SAVED BY SHIELD!";
                 RestStatusText.Foreground = System.Windows.Media.Brushes.DodgerBlue;
                 App.TrayManager?.ShowNotification("Shield Used!", "You moved, but a shield saved your streak!");
             }
@@ -163,7 +170,6 @@ namespace PausaVital.Views
                 RestStatusText.Text = "STREAK BROKEN!";
                 RestStatusText.Foreground = System.Windows.Media.Brushes.Red;
                 App.TrayManager?.ShowNotification("Streak Broken", "You moved before the 20 seconds were up!");
-
                 await apiService.RecordBreakAsync(currentUserId, currentHabitId, "failed");
             }
 
