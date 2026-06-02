@@ -21,9 +21,11 @@ namespace PausaVital.Views
         private int currentUserId = 0;
         private int currentHabitId = 0;
 
-        // Cache to avoid querying API every second for TrayIcon text
         private int cachedStreak = 0;
         private int cachedShields = 0;
+
+        // NEW: Flag to check if we are really shutting down
+        public bool IsShuttingDown { get; set; } = false;
 
         public MainWindow()
         {
@@ -36,12 +38,37 @@ namespace PausaVital.Views
             Loaded += OnMainWindowLoaded;
             Closed += OnMainWindowClosed;
 
+            // NEW: Intercept closing and minimizing events
+            Closing += OnMainWindowClosing;
+            StateChanged += OnWindowStateChanged;
+
             idleTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
             idleTimer.Tick += OnIdleTimerTicked;
             idleTimer.Start();
+        }
+
+        // NEW: Hide window if minimized
+        private void OnWindowStateChanged(object? sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                Hide();
+            }
+        }
+
+        // NEW: Intercept the 'X' button
+        private void OnMainWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // If it's not a real shutdown from the Tray Icon, cancel it and hide
+            if (!IsShuttingDown)
+            {
+                e.Cancel = true;
+                Hide();
+                App.TrayManager?.ShowNotification("Pausa Vital", "Running in background. Right-click tray icon to exit.");
+            }
         }
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
@@ -51,7 +78,6 @@ namespace PausaVital.Views
             UpdateConnectionStatus(isConnected);
         }
 
-        // Resolving the ambiguity by explicitly calling System.Windows.Media.Brush
         private void UpdateConnectionUI(string text, System.Windows.Media.Brush color)
         {
             ConnectionStatusText.Text = text;
@@ -62,7 +88,7 @@ namespace PausaVital.Views
         {
             if (isConnected)
             {
-                UpdateConnectionUI("Connected", System.Windows.Media.Brushes.MediumSeaGreen);
+                UpdateConnectionUI("Backend connected", System.Windows.Media.Brushes.MediumSeaGreen);
 
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
                 currentHabitId = await apiService.GetDefaultHabitAsync();
