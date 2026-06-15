@@ -11,6 +11,7 @@ namespace PausaVital.Views
         private readonly ApiService apiService;
         private readonly BackendProcessManager backendProcessManager;
         private readonly DispatcherTimer idleTimer;
+        private readonly DispatcherTimer reconnectTimer; // Timer for backend reconnection
         private readonly BreakManager breakManager;
         private DateTime lastTickTime = DateTime.UtcNow;
 
@@ -40,6 +41,13 @@ namespace PausaVital.Views
 
             Closing += OnMainWindowClosing;
             StateChanged += OnWindowStateChanged;
+
+            // Setup the reconnection timer (15 seconds)
+            reconnectTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(15)
+            };
+            reconnectTimer.Tick += OnReconnectTimerTicked;
 
             idleTimer = new DispatcherTimer
             {
@@ -114,6 +122,16 @@ namespace PausaVital.Views
             UpdateConnectionStatus(isConnected);
         }
 
+        // Method triggered every 15 seconds if backend is offline
+        private async void OnReconnectTimerTicked(object? sender, EventArgs e)
+        {
+            reconnectTimer.Stop(); // Pause timer while attempting to connect
+            UpdateConnectionUI("Retrying connection...", System.Windows.Media.Brushes.Goldenrod);
+
+            bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
+            UpdateConnectionStatus(isConnected);
+        }
+
         private void UpdateConnectionUI(string text, System.Windows.Media.Brush color)
         {
             ConnectionStatusText.Text = text;
@@ -124,6 +142,7 @@ namespace PausaVital.Views
         {
             if (isConnected)
             {
+                reconnectTimer.Stop(); // Ensure it stops if connected
                 UpdateConnectionUI("Connected", System.Windows.Media.Brushes.MediumSeaGreen);
 
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
@@ -132,7 +151,8 @@ namespace PausaVital.Views
             }
             else
             {
-                UpdateConnectionUI("Disconnected", System.Windows.Media.Brushes.IndianRed);
+                UpdateConnectionUI("Disconnected. Retrying...", System.Windows.Media.Brushes.IndianRed);
+                reconnectTimer.Start(); // Start the 15-second countdown
             }
         }
 
@@ -247,6 +267,7 @@ namespace PausaVital.Views
         private void OnMainWindowClosed(object? sender, EventArgs e)
         {
             idleTimer.Stop();
+            reconnectTimer.Stop(); // Ensure reconnect timer is properly disposed
             backendProcessManager.Dispose();
         }
     }
