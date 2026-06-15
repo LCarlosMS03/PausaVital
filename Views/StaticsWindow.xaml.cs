@@ -9,7 +9,7 @@ namespace PausaVital.Views
     {
         private readonly ApiService apiService;
         private readonly int userId;
-        private readonly DispatcherTimer liveTimer; // NEW: Timer for live stats
+        private readonly DispatcherTimer liveTimer; // Timer for live stats
 
         public StatisticsWindow(int userId)
         {
@@ -20,7 +20,7 @@ namespace PausaVital.Views
             Loaded += OnWindowLoaded;
             Closed += OnWindowClosed; // Clean up when closed
 
-            // NEW: Setup the live timer
+            // Setup the live timer
             liveTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
@@ -30,7 +30,7 @@ namespace PausaVital.Views
 
         private async void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            // 1. Fetch static data from SQLite
+            // Fetch static data from SQLite
             var stats = await apiService.GetUserStatsAsync(userId);
 
             if (stats.HasValue)
@@ -42,11 +42,11 @@ namespace PausaVital.Views
                 FailedText.Text = stats.Value.failed.ToString();
             }
 
-            // 2. Start live monitoring
+            // Start live monitoring
             liveTimer.Start();
         }
 
-        // NEW: Update the idle text every second
+        // Update the idle text every second
         private void OnLiveTimerTicked(object? sender, EventArgs e)
         {
             TimeSpan idle = ActivityMonitor.GetIdleTime();
@@ -58,7 +58,7 @@ namespace PausaVital.Views
             Close();
         }
 
-        // NEW: Stop the timer to free up memory
+        // Stop the timer to free up memory
         private void OnWindowClosed(object? sender, EventArgs e)
         {
             liveTimer.Stop();
