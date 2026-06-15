@@ -127,7 +127,6 @@ namespace PausaVital.Views
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            // Initialize dictionary with user's saved language
             TranslationManager.Initialize();
 
             var prefs = PreferencesManager.Load();
@@ -142,13 +141,16 @@ namespace PausaVital.Views
             breakManager.SetMode(mode);
             restDurationSeconds = mode == "Pomodoro" ? 300 : 20;
 
-            // Translate the UI button (Ensure your XAML button has Name="HideToBackgroundButton")
             if (HideToBackgroundButton != null)
             {
                 HideToBackgroundButton.Content = TranslationManager.Get("HideToBackgroundBtn", "Hide to Background");
             }
 
-            // Translate the starting connection status
+            if (LangToggleButton != null)
+            {
+                LangToggleButton.Content = prefs.Language == "en" ? "🌐 EN" : "🌐 ES";
+            }
+
             UpdateConnectionUI(TranslationManager.Get("Starting", "Starting connection..."), System.Windows.Media.Brushes.Goldenrod);
 
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
@@ -311,6 +313,36 @@ namespace PausaVital.Views
             reconnectTimer.Stop();
             hydrationTimer.Stop(); // Clean up hydration timer to prevent memory leaks
             backendProcessManager.Dispose();
+        }
+
+        private async void OnLangToggleClicked(object sender, RoutedEventArgs e)
+        {
+            var prefs = PreferencesManager.Load();
+            prefs.Language = prefs.Language == "en" ? "es" : "en";
+            PreferencesManager.Save(prefs);
+
+            TranslationManager.CurrentLanguage = prefs.Language;
+            LangToggleButton.Content = prefs.Language == "en" ? "🌐 EN" : "🌐 ES";
+
+            if (HideToBackgroundButton != null)
+            {
+                HideToBackgroundButton.Content = TranslationManager.Get("HideToBackgroundBtn", "Hide to Background");
+            }
+
+            await UpdateStreakAndShieldsAsync();
+
+            if (ConnectionStatusText.Text == "Conectado" || ConnectionStatusText.Text == "Connected")
+            {
+                UpdateConnectionUI(TranslationManager.Get("Connected", "Connected"), System.Windows.Media.Brushes.MediumSeaGreen);
+            }
+            else if (ConnectionStatusText.Text == "Iniciando conexión..." || ConnectionStatusText.Text == "Starting connection...")
+            {
+                UpdateConnectionUI(TranslationManager.Get("Starting", "Starting connection..."), System.Windows.Media.Brushes.Goldenrod);
+            }
+            else
+            {
+                UpdateConnectionUI(TranslationManager.Get("Disconnected", "Disconnected. Retrying..."), System.Windows.Media.Brushes.IndianRed);
+            }
         }
     }
 }

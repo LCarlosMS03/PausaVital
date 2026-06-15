@@ -45,5 +45,9 @@
 				<TextBlock Name="ConnectionStatusText" Text="Connecting..." FontSize="11" Foreground="#7F8C8D"/>
 			</StackPanel>
 		</Border>
+
+		<Button Name="LangToggleButton" Content="🌐 ES" Click="OnLangToggleClicked"
+        Background="Transparent" Foreground="#7F8C8D" BorderThickness="0"
+        Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" FontSize="12" FontWeight="SemiBold"/>
 	</Grid>
 </Window>
