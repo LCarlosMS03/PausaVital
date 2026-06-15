@@ -30,9 +30,16 @@ namespace PausaVital.Views
 
         private async void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
+            // Localize UI elements dynamically
+            HeaderTitleText.Text = TranslationManager.Get("StatsTitle", "Performance Overview");
+            SuccessLabelText.Text = TranslationManager.Get("SuccessRateLabel", "SUCCESS RATE");
+            CompletedLabelText.Text = TranslationManager.Get("CompletedLabel", "COMPLETED");
+            FailedLabelText.Text = TranslationManager.Get("FailedLabel", "FAILED");
+            LiveIdleLabelText.Text = TranslationManager.Get("LiveIdleLabel", "Live System Idle Time: ");
+            CloseBtnText.Text = TranslationManager.Get("CloseDashboardBtn", "Close Dashboard");
+
             // Fetch static data from SQLite
             var stats = await apiService.GetUserStatsAsync(userId);
-
             if (stats.HasValue)
             {
                 SuccessRateText.Text = $"{stats.Value.successRate}%";
@@ -42,7 +49,6 @@ namespace PausaVital.Views
                 FailedText.Text = stats.Value.failed.ToString();
             }
 
-            // Start live monitoring
             liveTimer.Start();
         }
 

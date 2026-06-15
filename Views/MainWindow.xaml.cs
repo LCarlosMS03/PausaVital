@@ -113,7 +113,9 @@ namespace PausaVital.Views
             Hide();
             if (!hasShownMinimizeNotification)
             {
-                App.TrayManager?.ShowNotification("Pausa Vital", "Running in background. Right-click tray icon to exit.");
+                App.TrayManager?.ShowNotification(
+                    "Pausa Vital",
+                    TranslationManager.Get("RunningBackground", "Running in background. Right-click tray icon to exit."));
                 hasShownMinimizeNotification = true;
             }
         }
@@ -125,6 +127,9 @@ namespace PausaVital.Views
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
+            // Initialize dictionary with user's saved language
+            TranslationManager.Initialize();
+
             var prefs = PreferencesManager.Load();
             if (string.IsNullOrEmpty(prefs.SelectedMode) || prefs.SelectedMode == "None")
             {
@@ -137,7 +142,15 @@ namespace PausaVital.Views
             breakManager.SetMode(mode);
             restDurationSeconds = mode == "Pomodoro" ? 300 : 20;
 
-            UpdateConnectionUI("Starting connection...", System.Windows.Media.Brushes.Goldenrod);
+            // Translate the UI button (Ensure your XAML button has Name="HideToBackgroundButton")
+            if (HideToBackgroundButton != null)
+            {
+                HideToBackgroundButton.Content = TranslationManager.Get("HideToBackgroundBtn", "Hide to Background");
+            }
+
+            // Translate the starting connection status
+            UpdateConnectionUI(TranslationManager.Get("Starting", "Starting connection..."), System.Windows.Media.Brushes.Goldenrod);
+
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
             UpdateConnectionStatus(isConnected);
         }
@@ -151,7 +164,6 @@ namespace PausaVital.Views
             UpdateConnectionStatus(isConnected);
         }
 
-        // NEW: Trigger hydration notification hourly
         private void OnHydrationTimerTicked(object? sender, EventArgs e)
         {
             App.TrayManager?.ShowNotification(
@@ -170,7 +182,7 @@ namespace PausaVital.Views
             if (isConnected)
             {
                 reconnectTimer.Stop();
-                UpdateConnectionUI("Connected", System.Windows.Media.Brushes.MediumSeaGreen);
+                UpdateConnectionUI(TranslationManager.Get("Connected", "Connected"), System.Windows.Media.Brushes.MediumSeaGreen);
 
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
                 currentHabitId = await apiService.GetDefaultHabitAsync();
@@ -178,7 +190,7 @@ namespace PausaVital.Views
             }
             else
             {
-                UpdateConnectionUI("Disconnected. Retrying...", System.Windows.Media.Brushes.IndianRed);
+                UpdateConnectionUI(TranslationManager.Get("Disconnected", "Disconnected. Retrying..."), System.Windows.Media.Brushes.IndianRed);
                 reconnectTimer.Start();
             }
         }
@@ -188,10 +200,10 @@ namespace PausaVital.Views
             if (currentUserId == 0) return;
 
             cachedStreak = await apiService.GetCurrentStreakAsync(currentUserId);
-            StreakText.Text = $"🔥 Streak: {cachedStreak}";
+            StreakText.Text = $"{TranslationManager.Get("Streak", "🔥 Streak:")} {cachedStreak}";
 
             cachedShields = await apiService.GetShieldsAsync(currentUserId);
-            ShieldsText.Text = $"🛡️ Shields: {cachedShields}";
+            ShieldsText.Text = $"{TranslationManager.Get("Shields", "🛡️ Shields:")} {cachedShields}";
         }
 
         private async void OnIdleTimerTicked(object? sender, EventArgs e)

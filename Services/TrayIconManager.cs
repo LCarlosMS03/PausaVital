@@ -18,14 +18,14 @@ namespace PausaVital.Services
 
             contextMenu = new ContextMenuStrip();
 
-            var showMenuItem = new ToolStripMenuItem("Show Dashboard");
+            var showMenuItem = new ToolStripMenuItem(TranslationManager.Get("MenuShow", "Show Dashboard"));
             showMenuItem.Font = new Font(showMenuItem.Font, WinDrawingFontStyle.Bold);
             showMenuItem.Click += (s, e) => ShowDashboard();
 
-            var statsMenuItem = new ToolStripMenuItem("Advanced Statistics");
+            var statsMenuItem = new ToolStripMenuItem(TranslationManager.Get("MenuStats", "Advanced Statistics"));
             statsMenuItem.Click += (s, e) => ShowStatisticsWindow();
 
-            var exitMenuItem = new ToolStripMenuItem("Exit Pausa Vital");
+            var exitMenuItem = new ToolStripMenuItem(TranslationManager.Get("MenuExit", "Exit"));
             exitMenuItem.Click += (s, e) => ExitApplication();
 
             contextMenu.Items.Add(showMenuItem);

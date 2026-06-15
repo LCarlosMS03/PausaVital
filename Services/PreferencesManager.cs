@@ -8,6 +8,7 @@ namespace PausaVital.Services
     {
         public string CloseAction { get; set; } = "Ask";
         public string SelectedMode { get; set; } = "None";
+        public string Language { get; set; } = "es"; // Idioma español
     }
 
     public static class PreferencesManager

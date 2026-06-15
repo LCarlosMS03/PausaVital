@@ -29,7 +29,7 @@
 					<TextBlock Name="ShieldsText" Text="🛡️ Shields: 0" FontSize="16" FontWeight="SemiBold" Foreground="#F1C40F"/>
 				</StackPanel>
 
-				<Button Name="HideToTrayButton" Content="Hide to Background" Background="#ECF0F1" Foreground="#34495E" BorderThickness="0" Padding="10" Margin="0,30,0,0" Cursor="Hand" Click="OnHideToTrayButtonClicked">
+				<Button Name="HideToBackgroundButton" Content="Hide to Background" Background="#ECF0F1" Foreground="#34495E" BorderThickness="0" Padding="10" Margin="0,30,0,0" Cursor="Hand" Click="OnHideToTrayButtonClicked">
 					<Button.Resources>
 						<Style TargetType="Border">
 							<Setter Property="CornerRadius" Value="8"/>
