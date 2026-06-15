@@ -24,7 +24,6 @@ namespace PausaVital.Views
         private int cachedStreak = 0;
         private int cachedShields = 0;
 
-        // NEW: Flag to check if we are really shutting down
         public bool IsShuttingDown { get; set; } = false;
         private bool hasShownMinimizeNotification = false;
 
@@ -39,7 +38,6 @@ namespace PausaVital.Views
             Loaded += OnMainWindowLoaded;
             Closed += OnMainWindowClosed;
 
-            // NEW: Intercept closing and minimizing events
             Closing += OnMainWindowClosing;
             StateChanged += OnWindowStateChanged;
 
@@ -61,17 +59,52 @@ namespace PausaVital.Views
 
         private void OnMainWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!IsShuttingDown)
-            {
-                e.Cancel = true;
-                Hide();
+            if (IsShuttingDown) return;
 
-                if (!hasShownMinimizeNotification)
+            e.Cancel = true;
+
+            var prefs = PreferencesManager.Load();
+
+            if (prefs.CloseAction == "Minimize")
+            {
+                ExecuteHideToTray();
+                return;
+            }
+            if (prefs.CloseAction == "Exit")
+            {
+                IsShuttingDown = true;
+                System.Windows.Application.Current.Shutdown();
+                return;
+            }
+
+            var prompt = new ClosePromptWindow { Owner = this };
+            if (prompt.ShowDialog() == true)
+            {
+                if (prompt.SelectedAction == "Minimize")
                 {
-                    App.TrayManager?.ShowNotification("Pausa Vital", "Running in background. Right-click tray icon to exit.");
-                    hasShownMinimizeNotification = true;
+                    ExecuteHideToTray();
+                }
+                else if (prompt.SelectedAction == "Exit")
+                {
+                    IsShuttingDown = true;
+                    System.Windows.Application.Current.Shutdown();
                 }
             }
+        }
+
+        private void ExecuteHideToTray()
+        {
+            Hide();
+            if (!hasShownMinimizeNotification)
+            {
+                App.TrayManager?.ShowNotification("Pausa Vital", "Running in background. Right-click tray icon to exit.");
+                hasShownMinimizeNotification = true;
+            }
+        }
+
+        private void OnHideToTrayButtonClicked(object sender, RoutedEventArgs e)
+        {
+            ExecuteHideToTray();
         }
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
@@ -209,11 +242,6 @@ namespace PausaVital.Views
             {
                 RestStatusText.Visibility = Visibility.Collapsed;
             }
-        }
-
-        private void OnHideToTrayButtonClicked(object sender, RoutedEventArgs e)
-        {
-            Hide();
         }
 
         private void OnMainWindowClosed(object? sender, EventArgs e)
