@@ -11,7 +11,8 @@ namespace PausaVital.Views
         private readonly ApiService apiService;
         private readonly BackendProcessManager backendProcessManager;
         private readonly DispatcherTimer idleTimer;
-        private readonly DispatcherTimer reconnectTimer; // Timer for backend reconnection
+        private readonly DispatcherTimer reconnectTimer;
+        private readonly DispatcherTimer hydrationTimer; // NEW: Timer for hourly hydration alerts
         private readonly BreakManager breakManager;
         private DateTime lastTickTime = DateTime.UtcNow;
 
@@ -42,12 +43,19 @@ namespace PausaVital.Views
             Closing += OnMainWindowClosing;
             StateChanged += OnWindowStateChanged;
 
-            // Setup the reconnection timer (15 seconds)
             reconnectTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(15)
             };
             reconnectTimer.Tick += OnReconnectTimerTicked;
+
+            // NEW: Setup hydration timer to tick every 1 hour
+            hydrationTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromHours(1)
+            };
+            hydrationTimer.Tick += OnHydrationTimerTicked;
+            hydrationTimer.Start();
 
             idleTimer = new DispatcherTimer
             {
@@ -134,14 +142,21 @@ namespace PausaVital.Views
             UpdateConnectionStatus(isConnected);
         }
 
-        // Method triggered every 15 seconds if backend is offline
         private async void OnReconnectTimerTicked(object? sender, EventArgs e)
         {
-            reconnectTimer.Stop(); // Pause timer while attempting to connect
+            reconnectTimer.Stop();
             UpdateConnectionUI("Retrying connection...", System.Windows.Media.Brushes.Goldenrod);
 
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
             UpdateConnectionStatus(isConnected);
+        }
+
+        // NEW: Trigger hydration notification hourly
+        private void OnHydrationTimerTicked(object? sender, EventArgs e)
+        {
+            App.TrayManager?.ShowNotification(
+                "Hydration Reminder",
+                "Time to drink a glass of water to stay healthy and focused!");
         }
 
         private void UpdateConnectionUI(string text, System.Windows.Media.Brush color)
@@ -154,7 +169,7 @@ namespace PausaVital.Views
         {
             if (isConnected)
             {
-                reconnectTimer.Stop(); // Ensure it stops if connected
+                reconnectTimer.Stop();
                 UpdateConnectionUI("Connected", System.Windows.Media.Brushes.MediumSeaGreen);
 
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
@@ -164,7 +179,7 @@ namespace PausaVital.Views
             else
             {
                 UpdateConnectionUI("Disconnected. Retrying...", System.Windows.Media.Brushes.IndianRed);
-                reconnectTimer.Start(); // Start the 15-second countdown
+                reconnectTimer.Start();
             }
         }
 
@@ -281,7 +296,8 @@ namespace PausaVital.Views
         private void OnMainWindowClosed(object? sender, EventArgs e)
         {
             idleTimer.Stop();
-            reconnectTimer.Stop(); // Ensure reconnect timer is properly disposed
+            reconnectTimer.Stop();
+            hydrationTimer.Stop(); // NEW: Clean up hydration timer to prevent memory leaks
             backendProcessManager.Dispose();
         }
     }
