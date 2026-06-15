@@ -7,6 +7,7 @@ namespace PausaVital.Services
     public class AppPreferences
     {
         public string CloseAction { get; set; } = "Ask";
+        public string SelectedMode { get; set; } = "None";
     }
 
     public static class PreferencesManager

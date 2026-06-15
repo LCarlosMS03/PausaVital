@@ -4,7 +4,7 @@ namespace PausaVital.Services
 {
     public class BreakManager
     {
-        private static readonly TimeSpan WorkThreshold = TimeSpan.FromMinutes(20);
+        private TimeSpan workThreshold = TimeSpan.FromMinutes(20);
         private static readonly TimeSpan ActiveThreshold = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan LongIdleResetThreshold = TimeSpan.FromMinutes(5);
 
@@ -12,27 +12,34 @@ namespace PausaVital.Services
 
         public TimeSpan WorkTime => workTime;
 
+        public void SetMode(string mode)
+        {
+            if (mode == "Pomodoro")
+            {
+                workThreshold = TimeSpan.FromMinutes(25);
+            }
+            else
+            {
+                workThreshold = TimeSpan.FromMinutes(20);
+            }
+        }
+
         public bool ShouldTakeBreak(TimeSpan idleTime, TimeSpan elapsed)
         {
-            if (elapsed <= TimeSpan.Zero)
-            {
-                return false;
-            }
+            if (elapsed <= TimeSpan.Zero) return false;
 
-            // If the user has been away for a while, consider that a natural pause and restart the work cycle.
             if (idleTime >= LongIdleResetThreshold)
             {
                 workTime = TimeSpan.Zero;
                 return false;
             }
 
-            // Count only active work. Small idle periods are normal, but long idle periods should not add time.
             if (idleTime < ActiveThreshold)
             {
                 workTime += elapsed;
             }
 
-            if (workTime < WorkThreshold)
+            if (workTime < workThreshold)
             {
                 return false;
             }

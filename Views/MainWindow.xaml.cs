@@ -17,7 +17,7 @@ namespace PausaVital.Views
 
         private bool isResting = false;
         private int restSecondsRemaining = 0;
-        private const int RestDurationSeconds = 20;
+        private int restDurationSeconds = 20;
 
         public int currentUserId { get; private set; } = 0;
         private int currentHabitId = 0;
@@ -117,6 +117,18 @@ namespace PausaVital.Views
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
+            var prefs = PreferencesManager.Load();
+            if (string.IsNullOrEmpty(prefs.SelectedMode) || prefs.SelectedMode == "None")
+            {
+                var modeWindow = new ModeSelectionWindow { Owner = this };
+                modeWindow.ShowDialog();
+                prefs = PreferencesManager.Load();
+            }
+
+            string mode = prefs.SelectedMode == "Pomodoro" ? "Pomodoro" : "20-20-20";
+            breakManager.SetMode(mode);
+            restDurationSeconds = mode == "Pomodoro" ? 300 : 20;
+
             UpdateConnectionUI("Starting connection...", System.Windows.Media.Brushes.Goldenrod);
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
             UpdateConnectionStatus(isConnected);
@@ -211,15 +223,17 @@ namespace PausaVital.Views
         private void StartRestMode()
         {
             isResting = true;
-            restSecondsRemaining = RestDurationSeconds;
+            restSecondsRemaining = restDurationSeconds;
 
             RestStatusText.Visibility = Visibility.Visible;
             RestStatusText.Text = $"RESTING... DO NOT MOVE! ({restSecondsRemaining}s)";
             RestStatusText.Foreground = System.Windows.Media.Brushes.DarkOrange;
 
-            App.TrayManager?.ShowNotification(
-                "20-20-20 Rule",
-                $"Look away for {RestDurationSeconds} seconds! Do not touch the mouse or keyboard.");
+            string tip = restDurationSeconds == 300
+                ? "Time for a 5-minute break! Stand up and stretch."
+                : "Look away for 20 seconds! Do not touch the mouse or keyboard.";
+
+            App.TrayManager?.ShowNotification("Break Time", tip);
         }
 
         private async Task HandleSuccessfulRestAsync()
