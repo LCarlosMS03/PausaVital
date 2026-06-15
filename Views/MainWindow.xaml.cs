@@ -12,7 +12,7 @@ namespace PausaVital.Views
         private readonly BackendProcessManager backendProcessManager;
         private readonly DispatcherTimer idleTimer;
         private readonly DispatcherTimer reconnectTimer;
-        private readonly DispatcherTimer hydrationTimer; // NEW: Timer for hourly hydration alerts
+        private readonly DispatcherTimer hydrationTimer;
         private readonly BreakManager breakManager;
         private DateTime lastTickTime = DateTime.UtcNow;
 
@@ -49,7 +49,7 @@ namespace PausaVital.Views
             };
             reconnectTimer.Tick += OnReconnectTimerTicked;
 
-            // NEW: Setup hydration timer to tick every 1 hour
+            // Setup hydration timer to tick every 1 hour
             hydrationTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromHours(1)
@@ -297,7 +297,7 @@ namespace PausaVital.Views
         {
             idleTimer.Stop();
             reconnectTimer.Stop();
-            hydrationTimer.Stop(); // NEW: Clean up hydration timer to prevent memory leaks
+            hydrationTimer.Stop(); // Clean up hydration timer to prevent memory leaks
             backendProcessManager.Dispose();
         }
     }

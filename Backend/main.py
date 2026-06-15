@@ -107,14 +107,43 @@ def get_default_habit():
 def record_break(log: BreakLog):
     conn = get_db_connection()
     cursor = conn.cursor()
+    
     completed_at = datetime.utcnow().isoformat()
     cursor.execute(
         "INSERT INTO event_logs (user_id, habit_id, completed_at, status) VALUES (?, ?, ?, ?)",
         (log.user_id, log.habit_id, completed_at, log.status)
     )
+    
+    if log.status == "completed":
+        cursor.execute(
+            "SELECT completed_at FROM event_logs WHERE user_id = ? AND status = 'failed' ORDER BY completed_at DESC LIMIT 1", 
+            (log.user_id,)
+        )
+        last_fail = cursor.fetchone()
+        
+        if last_fail:
+            cursor.execute(
+                "SELECT COUNT(*) FROM event_logs WHERE user_id = ? AND status = 'completed' AND completed_at > ?", 
+                (log.user_id, last_fail[0])
+            )
+        else:
+            cursor.execute(
+                "SELECT COUNT(*) FROM event_logs WHERE user_id = ? AND status = 'completed'", 
+                (log.user_id,)
+            )
+        
+        current_streak = cursor.fetchone()[0]
+        
+        if current_streak > 0 and current_streak % 5 == 0:
+            cursor.execute("SELECT shields FROM users WHERE id = ?", (log.user_id,))
+            user_row = cursor.fetchone()
+            if user_row and user_row[0] < 3:
+                cursor.execute("UPDATE users SET shields = shields + 1 WHERE id = ?", (log.user_id,))
+                
     conn.commit()
     conn.close()
-    return {"message": "Break recorded"}
+    return {"success": True, "message": "Break recorded"}
+
 
 @app.get("/streaks/{user_id}")
 def get_current_streak(user_id: int):
@@ -175,6 +204,9 @@ def get_user_stats(user_id: int):
         "total_failed": failed,
         "success_rate": round(success_rate, 1)
     }
+@app.get("/")
+def read_root():
+    return {"message": "Bienvenido a la API de PausaVital. Visita /docs para ver las rutas disponibles."}
 
 # Run the app
 if __name__ == "__main__":
