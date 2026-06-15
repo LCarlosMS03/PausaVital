@@ -15,8 +15,38 @@ namespace PausaVital.Services
             this.apiService = apiService;
         }
 
+        private void ExtractBackendResource()
+        {
+            string targetFolder = Path.Combine(AppContext.BaseDirectory, "Backend");
+            string targetPath = Path.Combine(targetFolder, "PausaVitalBackend.exe");
+
+            if (!Directory.Exists(targetFolder))
+            {
+                Directory.CreateDirectory(targetFolder);
+            }
+
+            if (!File.Exists(targetPath))
+            {
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+
+                string resourceName = "PausaVital.PausaVitalBackend.exe";
+
+                using (Stream? resourceStream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (resourceStream == null) return;
+
+                    using (FileStream fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+            }
+        }
+
         public async Task<bool> EnsureBackendIsRunningAsync()
         {
+            ExtractBackendResource();
+
             if (await apiService.CheckHealthAsync())
             {
                 return true;
@@ -29,7 +59,6 @@ namespace PausaVital.Services
                 return false;
             }
 
-            // Look exclusively for the compiled Python executable
             string executablePath = Path.Combine(backendDirectory, "PausaVitalBackend.exe");
 
             if (File.Exists(executablePath))
@@ -106,7 +135,6 @@ namespace PausaVital.Services
             }
             catch
             {
-                // Ignore shutdown errors so the WPF app can close cleanly.
             }
             finally
             {

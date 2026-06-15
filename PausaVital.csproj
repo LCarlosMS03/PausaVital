@@ -16,4 +16,12 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="PausaVitalBackend.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="PausaVitalBackend.exe" />
+  </ItemGroup>
+
 </Project>
