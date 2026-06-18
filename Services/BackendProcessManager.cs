@@ -45,7 +45,6 @@ namespace PausaVital.Services
 
         public async Task<bool> EnsureBackendIsRunningAsync()
         {
-            ExtractBackendResource();
 
             if (await apiService.CheckHealthAsync())
             {
@@ -60,6 +59,11 @@ namespace PausaVital.Services
             }
 
             string executablePath = Path.Combine(backendDirectory, "PausaVitalBackend.exe");
+
+            if (backendProcess is not null && !backendProcess.HasExited)
+            {
+                return await WaitForBackendHealthAsync();
+            }
 
             if (File.Exists(executablePath))
             {
@@ -81,6 +85,26 @@ namespace PausaVital.Services
                 }
 
                 if (backendProcess.HasExited)
+                {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        private async Task<bool> WaitForBackendHealthAsync()
+        {
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                await Task.Delay(500);
+
+                if (await apiService.CheckHealthAsync())
+                {
+                    return true;
+                }
+
+                if (backendProcess is not null && backendProcess.HasExited)
                 {
                     return false;
                 }

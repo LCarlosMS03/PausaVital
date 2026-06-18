@@ -31,7 +31,17 @@ namespace PausaVital.Services
             { "CompletedLabel", "COMPLETADO" },
             { "FailedLabel", "FALLADO" },
             { "LiveIdleLabel", "Inactividad del Sistema: " },
-            { "CloseDashboardBtn", "Cerrar Panel" }
+            { "CloseDashboardBtn", "Cerrar Panel" },
+            { "WorkTimeLabel", "TIEMPO DE TRABAJO" },
+            { "Retrying", "Reintentando conexión..." },
+            { "BreakTitle", "Hora de descansar" },
+            { "BreakCompletedTitle", "Descanso completado" },
+            { "BreakCompletedMessage", "¡Buen trabajo! Racha actualizada." },
+            { "ShieldUsedTitle", "¡Escudo usado!" },
+            { "ShieldUsedMessage", "Te moviste, pero un escudo salvó tu racha." },
+            { "StreakBrokenTitle", "Racha terminada" },
+            { "StreakBrokenMessage", "Te moviste antes de completar el descanso." },
+            { "HydrationTitle", "Recordatorio de hidratación" }
         };
 
         public static void Initialize()

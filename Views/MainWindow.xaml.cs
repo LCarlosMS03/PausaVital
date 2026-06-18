@@ -28,12 +28,19 @@ namespace PausaVital.Views
 
         public bool IsShuttingDown { get; set; } = false;
         private bool hasShownMinimizeNotification = false;
+        private string connectionStatusKey = "Starting";
+        private string connectionStatusDefaultText = "Starting connection...";
+        private System.Windows.Media.Brush connectionStatusColor = System.Windows.Media.Brushes.Goldenrod;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            TranslationManager.Initialize();
+            ApplyStaticTranslations();
+
             apiService = new ApiService();
+            ;
             backendProcessManager = new BackendProcessManager(apiService);
             breakManager = new BreakManager();
 
@@ -151,19 +158,19 @@ namespace PausaVital.Views
                 LangToggleButton.Content = prefs.Language == "en" ? "🌐 EN" : "🌐 ES";
             }
 
-            UpdateConnectionUI(TranslationManager.Get("Starting", "Starting connection..."), System.Windows.Media.Brushes.Goldenrod);
+            UpdateConnectionUI("Starting", "Starting connection...", System.Windows.Media.Brushes.Goldenrod);
 
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
-            UpdateConnectionStatus(isConnected);
+            await UpdateConnectionStatusAsync(isConnected);
         }
 
         private async void OnReconnectTimerTicked(object? sender, EventArgs e)
         {
             reconnectTimer.Stop();
-            UpdateConnectionUI("Retrying connection...", System.Windows.Media.Brushes.Goldenrod);
+            UpdateConnectionUI("Retrying", "Retrying connection...", System.Windows.Media.Brushes.Goldenrod);
 
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
-            UpdateConnectionStatus(isConnected);
+            await UpdateConnectionStatusAsync(isConnected);
         }
 
         private void OnHydrationTimerTicked(object? sender, EventArgs e)
@@ -173,26 +180,65 @@ namespace PausaVital.Views
                 "Time to drink a glass of water to stay healthy and focused!");
         }
 
-        private void UpdateConnectionUI(string text, System.Windows.Media.Brush color)
+        private void ApplyStaticTranslations()
         {
-            ConnectionStatusText.Text = text;
-            ConnectionStatusDot.Fill = color;
+            var prefs = PreferencesManager.Load();
+            TranslationManager.CurrentLanguage = prefs.Language;
+
+            WorkTimeLabel.Text = TranslationManager.Get("WorkTimeLabel", "WORK TIME");
+
+            StreakText.Text = $"{TranslationManager.Get("Streak", "🔥 Streak:")} {cachedStreak}";
+            ShieldsText.Text = $"{TranslationManager.Get("Shields", "🛡️ Shields:")} {cachedShields}";
+
+            HideToBackgroundButton.Content = TranslationManager.Get("HideToBackgroundBtn", "Hide to Background");
+
+            LangToggleButton.Content = prefs.Language == "en" ? "🌐 EN" : "🌐 ES";
+
+            if (isResting)
+            {
+                RestStatusText.Text = $"{TranslationManager.Get("Resting", "RESTING... DO NOT MOVE!")} ({restSecondsRemaining}s)";
+            }
+
+            RefreshConnectionUI();
         }
 
-        private async void UpdateConnectionStatus(bool isConnected)
+        private void RefreshConnectionUI()
+        {
+            ConnectionStatusText.Text = TranslationManager.Get(connectionStatusKey, connectionStatusDefaultText);
+            ConnectionStatusDot.Fill = connectionStatusColor;
+        }
+
+        private void UpdateConnectionUI(string key, string defaultText, System.Windows.Media.Brush color)
+        {
+            connectionStatusKey = key;
+            connectionStatusDefaultText = defaultText;
+            connectionStatusColor = color;
+
+            RefreshConnectionUI();
+        }
+
+        private async Task UpdateConnectionStatusAsync(bool isConnected)
         {
             if (isConnected)
             {
                 reconnectTimer.Stop();
-                UpdateConnectionUI(TranslationManager.Get("Connected", "Connected"), System.Windows.Media.Brushes.MediumSeaGreen);
+                UpdateConnectionUI(
+                    "Connected",
+                    "Connected",
+                    System.Windows.Media.Brushes.MediumSeaGreen);
 
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
                 currentHabitId = await apiService.GetDefaultHabitAsync();
+
                 await UpdateStreakAndShieldsAsync();
             }
             else
             {
-                UpdateConnectionUI(TranslationManager.Get("Disconnected", "Disconnected. Retrying..."), System.Windows.Media.Brushes.IndianRed);
+                UpdateConnectionUI(
+                    "Disconnected",
+                    "Disconnected. Retrying...",
+                    System.Windows.Media.Brushes.IndianRed);
+
                 reconnectTimer.Start();
             }
         }
@@ -225,7 +271,7 @@ namespace PausaVital.Views
                 else
                 {
                     restSecondsRemaining--;
-                    RestStatusText.Text = $"RESTING... DO NOT MOVE! ({restSecondsRemaining}s)";
+                    RestStatusText.Text = $"{TranslationManager.Get("Resting", "RESTING... DO NOT MOVE!")} ({restSecondsRemaining}s)";
 
                     App.TrayManager?.UpdateText($"Resting: {restSecondsRemaining}s left");
 
@@ -255,20 +301,28 @@ namespace PausaVital.Views
             restSecondsRemaining = restDurationSeconds;
 
             RestStatusText.Visibility = Visibility.Visible;
-            RestStatusText.Text = $"RESTING... DO NOT MOVE! ({restSecondsRemaining}s)";
+            RestStatusText.Text = $"{TranslationManager.Get("Resting", "RESTING... DO NOT MOVE!")} ({restSecondsRemaining}s)";
             RestStatusText.Foreground = System.Windows.Media.Brushes.DarkOrange;
 
             string tip = restDurationSeconds == 300
                 ? "Time for a 5-minute break! Stand up and stretch."
                 : "Look away for 20 seconds! Do not touch the mouse or keyboard.";
 
-            App.TrayManager?.ShowNotification("Break Time", tip);
+            App.TrayManager?.ShowNotification(
+                TranslationManager.Get("BreakTitle", "Break Time"),
+                tip);
         }
 
         private async Task HandleSuccessfulRestAsync()
         {
             isResting = false;
             RestStatusText.Visibility = Visibility.Collapsed;
+
+            if (currentUserId == 0 || currentHabitId == 0)
+            {
+                App.TrayManager?.ShowNotification("Pausa Vital", "Backend is not ready yet.");
+                return;
+            }
 
             bool recorded = await apiService.RecordBreakAsync(currentUserId, currentHabitId, "completed");
             if (recorded)
@@ -281,6 +335,12 @@ namespace PausaVital.Views
         private async Task HandleFailedRestAsync()
         {
             isResting = false;
+
+            if (currentUserId == 0 || currentHabitId == 0)
+            {
+                RestStatusText.Visibility = Visibility.Collapsed;
+                return;
+            }
 
             bool shieldConsumed = await apiService.ConsumeShieldAsync(currentUserId);
 
@@ -318,30 +378,17 @@ namespace PausaVital.Views
         private async void OnLangToggleClicked(object sender, RoutedEventArgs e)
         {
             var prefs = PreferencesManager.Load();
+
             prefs.Language = prefs.Language == "en" ? "es" : "en";
             PreferencesManager.Save(prefs);
 
             TranslationManager.CurrentLanguage = prefs.Language;
-            LangToggleButton.Content = prefs.Language == "en" ? "🌐 EN" : "🌐 ES";
 
-            if (HideToBackgroundButton != null)
-            {
-                HideToBackgroundButton.Content = TranslationManager.Get("HideToBackgroundBtn", "Hide to Background");
-            }
+            ApplyStaticTranslations();
 
-            await UpdateStreakAndShieldsAsync();
-
-            if (ConnectionStatusText.Text == "Conectado" || ConnectionStatusText.Text == "Connected")
+            if (currentUserId != 0)
             {
-                UpdateConnectionUI(TranslationManager.Get("Connected", "Connected"), System.Windows.Media.Brushes.MediumSeaGreen);
-            }
-            else if (ConnectionStatusText.Text == "Iniciando conexión..." || ConnectionStatusText.Text == "Starting connection...")
-            {
-                UpdateConnectionUI(TranslationManager.Get("Starting", "Starting connection..."), System.Windows.Media.Brushes.Goldenrod);
-            }
-            else
-            {
-                UpdateConnectionUI(TranslationManager.Get("Disconnected", "Disconnected. Retrying..."), System.Windows.Media.Brushes.IndianRed);
+                await UpdateStreakAndShieldsAsync();
             }
         }
     }

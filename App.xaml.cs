@@ -27,9 +27,12 @@ namespace PausaVital
 
             base.OnStartup(e);
 
-            StartupManager.EnsureAutoStart();
+            // Lo registra para inicio automático en Windows
+            // StartupManager.EnsureAutoStart();
 
             bool startInBackground = e.Args.Contains("--background");
+
+            TranslationManager.Initialize();
 
             MainWindow appWindow = new MainWindow();
             TrayManager = new TrayIconManager(appWindow);
