@@ -43,7 +43,13 @@ namespace PausaVital.Services
             { "ShieldUsedMessage", "Te moviste, pero un escudo salvó tu racha." },
             { "StreakBrokenTitle", "Racha terminada" },
             { "StreakBrokenMessage", "Te moviste antes de completar el descanso." },
-            { "HydrationTitle", "Recordatorio de hidratación" }
+            { "HydrationTitle", "Recordatorio de hidratación" },
+            { "ClosePromptWindowTitle", "Salir de Pausa Vital" },
+            { "ClosePromptTitle", "¿Cómo quieres cerrar la aplicación?" },
+            { "ClosePromptDescription", "Puedes mantener Pausa Vital ejecutándose en segundo plano para conservar tus rachas, o salir completamente." },
+            { "ClosePromptRemember", "Recordar mi elección y no volver a preguntar" },
+            { "ClosePromptMinimize", "Minimizar a la bandeja" },
+            { "ClosePromptExit", "Salir completamente" },
         };
 
         public static void Initialize()
