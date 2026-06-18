@@ -385,6 +385,7 @@ namespace PausaVital.Views
             TranslationManager.CurrentLanguage = prefs.Language;
 
             ApplyStaticTranslations();
+            App.TrayManager?.RefreshTexts();
 
             if (currentUserId != 0)
             {

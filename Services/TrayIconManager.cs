@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
+using PausaVital.Views;
 using WinDrawingFontStyle = System.Drawing.FontStyle;
 
 namespace PausaVital.Services
@@ -12,20 +13,24 @@ namespace PausaVital.Services
         private readonly Window dashboardWindow;
         private readonly ContextMenuStrip contextMenu;
 
+        private readonly ToolStripMenuItem showMenuItem;
+        private readonly ToolStripMenuItem statsMenuItem;
+        private readonly ToolStripMenuItem exitMenuItem;
+
         public TrayIconManager(Window window)
         {
             dashboardWindow = window;
 
             contextMenu = new ContextMenuStrip();
 
-            var showMenuItem = new ToolStripMenuItem(TranslationManager.Get("MenuShow", "Show Dashboard"));
+            showMenuItem = new ToolStripMenuItem();
             showMenuItem.Font = new Font(showMenuItem.Font, WinDrawingFontStyle.Bold);
             showMenuItem.Click += (s, e) => ShowDashboard();
 
-            var statsMenuItem = new ToolStripMenuItem(TranslationManager.Get("MenuStats", "Advanced Statistics"));
+            statsMenuItem = new ToolStripMenuItem();
             statsMenuItem.Click += (s, e) => ShowStatisticsWindow();
 
-            var exitMenuItem = new ToolStripMenuItem(TranslationManager.Get("MenuExit", "Exit"));
+            exitMenuItem = new ToolStripMenuItem();
             exitMenuItem.Click += (s, e) => ExitApplication();
 
             contextMenu.Items.Add(showMenuItem);
@@ -33,27 +38,41 @@ namespace PausaVital.Services
             contextMenu.Items.Add(new ToolStripSeparator());
             contextMenu.Items.Add(exitMenuItem);
 
-            systemTrayIcon = new NotifyIcon();
-            systemTrayIcon.Icon = SystemIcons.Information;
-            systemTrayIcon.Visible = true;
-            systemTrayIcon.Text = "Pausa Vital";
-            systemTrayIcon.ContextMenuStrip = contextMenu;
+            systemTrayIcon = new NotifyIcon
+            {
+                Icon = SystemIcons.Information,
+                Visible = true,
+                Text = "Pausa Vital",
+                ContextMenuStrip = contextMenu
+            };
 
             systemTrayIcon.DoubleClick += (s, e) => ShowDashboard();
+
+            RefreshTexts();
+        }
+
+        public void RefreshTexts()
+        {
+            showMenuItem.Text = TranslationManager.Get("MenuShow", "Show Dashboard");
+            statsMenuItem.Text = TranslationManager.Get("MenuStats", "Advanced Statistics");
+            exitMenuItem.Text = TranslationManager.Get("MenuExit", "Exit");
         }
 
         private void ShowStatisticsWindow()
         {
-            if (dashboardWindow is PausaVital.Views.MainWindow mainWindow)
+            if (dashboardWindow is MainWindow mainWindow)
             {
                 if (mainWindow.currentUserId == 0)
                 {
-                    ShowNotification("Not Ready", "Please wait for the backend to connect.");
+                    ShowNotification(
+                        TranslationManager.Get("NotReadyTitle", "Not Ready"),
+                        TranslationManager.Get("BackendNotReady", "Please wait for the backend to connect."));
+
                     return;
                 }
 
-                var statsWindow = new PausaVital.Views.StatisticsWindow(mainWindow.currentUserId);
-                statsWindow.ShowDialog(); // ShowDialog prevents clicking the main window until closed
+                var statsWindow = new StatisticsWindow(mainWindow.currentUserId);
+                statsWindow.ShowDialog();
             }
         }
 
@@ -63,6 +82,7 @@ namespace PausaVital.Services
             {
                 text = text.Substring(0, 63);
             }
+
             systemTrayIcon.Text = text;
         }
 
@@ -81,7 +101,7 @@ namespace PausaVital.Services
 
         private void ExitApplication()
         {
-            if (dashboardWindow is PausaVital.Views.MainWindow mainWindow)
+            if (dashboardWindow is MainWindow mainWindow)
             {
                 mainWindow.IsShuttingDown = true;
             }

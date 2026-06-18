@@ -26,6 +26,8 @@ namespace PausaVital.Services
             { "MenuShow", "Mostrar Panel" },
             { "MenuStats", "Estadísticas Avanzadas" },
             { "MenuExit", "Salir" },
+            { "NotReadyTitle", "No está listo" },
+            { "BackendNotReady", "Espera a que el backend se conecte." },
             { "StatsTitle", "Resumen de Rendimiento" },
             { "SuccessRateLabel", "TASA DE ÉXITO" },
             { "CompletedLabel", "COMPLETADO" },
