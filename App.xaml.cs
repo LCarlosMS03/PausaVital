@@ -15,24 +15,30 @@ namespace PausaVital
         protected override void OnStartup(StartupEventArgs e)
         {
             const string mutexName = "PausaVital_SingleInstance_Mutex";
-            appMutex = new Mutex(true, mutexName, out bool createdNew);
+
+            appMutex = new Mutex(
+                initiallyOwned: true,
+                name: mutexName,
+                createdNew: out bool createdNew);
 
             if (!createdNew)
             {
-                System.Windows.MessageBox.Show("Pausa Vital is already running in the background. Check your System Tray.",
-                                "Pausa Vital", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show(
+                    "Pausa Vital ya se está ejecutando en segundo plano. Revisa el icono en la bandeja del sistema.",
+                    "Pausa Vital",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
                 Current.Shutdown();
                 return;
             }
 
             base.OnStartup(e);
 
-            // Lo registra para inicio automático en Windows
+            // Activar solamente cuando se necesite iniciar con Windows.
             // StartupManager.EnsureAutoStart();
 
             bool startInBackground = e.Args.Contains("--background");
-
-            TranslationManager.Initialize();
 
             MainWindow appWindow = new MainWindow();
             TrayManager = new TrayIconManager(appWindow);
@@ -41,8 +47,8 @@ namespace PausaVital
             {
                 appWindow.ShowInTaskbar = false;
                 appWindow.WindowState = WindowState.Minimized;
-                appWindow.Show(); 
-                appWindow.Hide(); 
+                appWindow.Show();
+                appWindow.Hide();
             }
             else
             {
@@ -55,10 +61,11 @@ namespace PausaVital
             TrayManager?.Dispose();
             TrayManager = null;
 
-            if (appMutex != null)
+            if (appMutex is not null)
             {
                 appMutex.ReleaseMutex();
                 appMutex.Dispose();
+                appMutex = null;
             }
 
             base.OnExit(e);

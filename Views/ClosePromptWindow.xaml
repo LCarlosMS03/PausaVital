@@ -1,7 +1,7 @@
-<Window x:Class="PausaVital.Views.ClosePromptWindow"
+﻿<Window x:Class="PausaVital.Views.ClosePromptWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Exit"
+        Title="Salir de Pausa Vital"
         Height="260"
         Width="470"
         WindowStartupLocation="CenterOwner"
@@ -20,16 +20,14 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0"
-                   Name="TitleText"
-                   Text="How do you want to close the app?"
+                   Text="¿Cómo quieres cerrar la aplicación?"
                    FontSize="18"
                    FontWeight="Bold"
                    Foreground="#2C3E50"
                    Margin="0,0,0,12"/>
 
         <TextBlock Grid.Row="1"
-                   Name="DescriptionText"
-                   Text="You can keep Pausa Vital running in the background to maintain your streaks, or exit completely."
+                   Text="Puedes mantener Pausa Vital ejecutándose en segundo plano para conservar tus rachas, o salir completamente."
                    TextWrapping="Wrap"
                    FontSize="14"
                    Foreground="#7F8C8D"
@@ -38,7 +36,7 @@
 
         <CheckBox Grid.Row="2"
                   Name="RememberCheckBox"
-                  Content="Remember my choice and don't ask again"
+                  Content="Recordar mi elección y no volver a preguntar"
                   Foreground="#34495E"
                   FontSize="14"
                   VerticalContentAlignment="Center"
@@ -52,8 +50,7 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0"
-                    Name="MinimizeButton"
-                    Content="Minimize to Tray"
+                    Content="Minimizar a la bandeja"
                     Height="44"
                     Background="#2980B9"
                     Foreground="White"
@@ -61,6 +58,7 @@
                     FontSize="14"
                     Cursor="Hand"
                     Click="OnMinimizeClicked">
+
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="6"/>
@@ -69,8 +67,7 @@
             </Button>
 
             <Button Grid.Column="2"
-                    Name="ExitButton"
-                    Content="Exit Completely"
+                    Content="Salir completamente"
                     Height="44"
                     Background="#E74C3C"
                     Foreground="White"
@@ -78,6 +75,7 @@
                     FontSize="14"
                     Cursor="Hand"
                     Click="OnExitClicked">
+
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="6"/>
