@@ -9,70 +9,63 @@ namespace PausaVital.Views
     {
         private readonly ApiService apiService;
         private readonly int userId;
-        private readonly DispatcherTimer liveTimer;
+        private readonly DispatcherTimer liveTimer; // Timer for live stats
 
         public StatisticsWindow(int userId)
         {
             InitializeComponent();
-
             this.userId = userId;
-            apiService = new ApiService();
+            this.apiService = new ApiService();
 
             Loaded += OnWindowLoaded;
-            Closed += OnWindowClosed;
+            Closed += OnWindowClosed; // Clean up when closed
 
+            // Setup the live timer
             liveTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-
             liveTimer.Tick += OnLiveTimerTicked;
         }
 
-        private async void OnWindowLoaded(
-            object sender,
-            RoutedEventArgs e)
+        private async void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            var stats = await apiService.GetUserStatsAsync(userId);
+            // Localize UI elements dynamically
+            HeaderTitleText.Text = TranslationManager.Get("StatsTitle", "Performance Overview");
+            SuccessLabelText.Text = TranslationManager.Get("SuccessRateLabel", "SUCCESS RATE");
+            CompletedLabelText.Text = TranslationManager.Get("CompletedLabel", "COMPLETED");
+            FailedLabelText.Text = TranslationManager.Get("FailedLabel", "FAILED");
+            LiveIdleLabelText.Text = TranslationManager.Get("LiveIdleLabel", "Live System Idle Time: ");
+            CloseBtnText.Text = TranslationManager.Get("CloseDashboardBtn", "Close Dashboard");
 
+            // Fetch static data from SQLite
+            var stats = await apiService.GetUserStatsAsync(userId);
             if (stats.HasValue)
             {
-                SuccessRateText.Text =
-                    $"{stats.Value.successRate}%";
+                SuccessRateText.Text = $"{stats.Value.successRate}%";
+                SuccessProgressBar.Value = stats.Value.successRate;
 
-                SuccessProgressBar.Value =
-                    stats.Value.successRate;
-
-                CompletedText.Text =
-                    stats.Value.completed.ToString();
-
-                FailedText.Text =
-                    stats.Value.failed.ToString();
+                CompletedText.Text = stats.Value.completed.ToString();
+                FailedText.Text = stats.Value.failed.ToString();
             }
 
             liveTimer.Start();
         }
 
-        private void OnLiveTimerTicked(
-            object? sender,
-            EventArgs e)
+        // Update the idle text every second
+        private void OnLiveTimerTicked(object? sender, EventArgs e)
         {
-            TimeSpan idleTime = ActivityMonitor.GetIdleTime();
-
-            LiveIdleText.Text =
-                $"{(int)idleTime.TotalMinutes:D2}:{idleTime.Seconds:D2}";
+            TimeSpan idle = ActivityMonitor.GetIdleTime();
+            LiveIdleText.Text = $"{(int)idle.TotalMinutes:D2}:{idle.Seconds:D2}";
         }
 
-        private void OnCloseButtonClicked(
-            object sender,
-            RoutedEventArgs e)
+        private void OnCloseButtonClicked(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
-        private void OnWindowClosed(
-            object? sender,
-            EventArgs e)
+        // Stop the timer to free up memory
+        private void OnWindowClosed(object? sender, EventArgs e)
         {
             liveTimer.Stop();
         }

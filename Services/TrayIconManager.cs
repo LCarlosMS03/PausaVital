@@ -13,36 +13,25 @@ namespace PausaVital.Services
         private readonly Window dashboardWindow;
         private readonly ContextMenuStrip contextMenu;
 
+        private readonly ToolStripMenuItem showMenuItem;
+        private readonly ToolStripMenuItem statsMenuItem;
+        private readonly ToolStripMenuItem exitMenuItem;
+
         public TrayIconManager(Window window)
         {
             dashboardWindow = window;
 
             contextMenu = new ContextMenuStrip();
 
-            var showMenuItem = new ToolStripMenuItem
-            {
-                Text = "Mostrar panel"
-            };
+            showMenuItem = new ToolStripMenuItem();
+            showMenuItem.Font = new Font(showMenuItem.Font, WinDrawingFontStyle.Bold);
+            showMenuItem.Click += (s, e) => ShowDashboard();
 
-            showMenuItem.Font = new Font(
-                showMenuItem.Font,
-                WinDrawingFontStyle.Bold);
+            statsMenuItem = new ToolStripMenuItem();
+            statsMenuItem.Click += (s, e) => ShowStatisticsWindow();
 
-            showMenuItem.Click += (_, _) => ShowDashboard();
-
-            var statsMenuItem = new ToolStripMenuItem
-            {
-                Text = "Estadísticas avanzadas"
-            };
-
-            statsMenuItem.Click += (_, _) => ShowStatisticsWindow();
-
-            var exitMenuItem = new ToolStripMenuItem
-            {
-                Text = "Salir"
-            };
-
-            exitMenuItem.Click += (_, _) => ExitApplication();
+            exitMenuItem = new ToolStripMenuItem();
+            exitMenuItem.Click += (s, e) => ExitApplication();
 
             contextMenu.Items.Add(showMenuItem);
             contextMenu.Items.Add(statsMenuItem);
@@ -57,55 +46,49 @@ namespace PausaVital.Services
                 ContextMenuStrip = contextMenu
             };
 
-            systemTrayIcon.DoubleClick += (_, _) => ShowDashboard();
+            systemTrayIcon.DoubleClick += (s, e) => ShowDashboard();
+
+            RefreshTexts();
+        }
+
+        public void RefreshTexts()
+        {
+            showMenuItem.Text = TranslationManager.Get("MenuShow", "Show Dashboard");
+            statsMenuItem.Text = TranslationManager.Get("MenuStats", "Advanced Statistics");
+            exitMenuItem.Text = TranslationManager.Get("MenuExit", "Exit");
         }
 
         private void ShowStatisticsWindow()
         {
-            if (dashboardWindow is not MainWindow mainWindow)
+            if (dashboardWindow is MainWindow mainWindow)
             {
-                return;
+                if (mainWindow.currentUserId == 0)
+                {
+                    ShowNotification(
+                        TranslationManager.Get("NotReadyTitle", "Not Ready"),
+                        TranslationManager.Get("BackendNotReady", "Please wait for the backend to connect."));
+
+                    return;
+                }
+
+                var statsWindow = new StatisticsWindow(mainWindow.currentUserId);
+                statsWindow.ShowDialog();
             }
-
-            if (mainWindow.currentUserId == 0)
-            {
-                ShowNotification(
-                    "Sistema no disponible",
-                    "Espera a que el programa termine de conectarse antes de abrir las estadísticas.");
-
-                return;
-            }
-
-            var statsWindow = new StatisticsWindow(mainWindow.currentUserId)
-            {
-                Owner = mainWindow
-            };
-
-            statsWindow.ShowDialog();
         }
 
         public void UpdateText(string text)
         {
-            const int maxLength = 63;
-
-            if (string.IsNullOrWhiteSpace(text))
+            if (text.Length >= 63)
             {
-                systemTrayIcon.Text = "Pausa Vital";
-                return;
+                text = text.Substring(0, 63);
             }
 
-            systemTrayIcon.Text = text.Length > maxLength
-                ? text[..maxLength]
-                : text;
+            systemTrayIcon.Text = text;
         }
 
         public void ShowNotification(string title, string message)
         {
-            systemTrayIcon.ShowBalloonTip(
-                3000,
-                title,
-                message,
-                ToolTipIcon.Info);
+            systemTrayIcon.ShowBalloonTip(3000, title, message, ToolTipIcon.Info);
         }
 
         private void ShowDashboard()
@@ -128,7 +111,6 @@ namespace PausaVital.Services
 
         public void Dispose()
         {
-            systemTrayIcon.Visible = false;
             contextMenu.Dispose();
             systemTrayIcon.Dispose();
         }

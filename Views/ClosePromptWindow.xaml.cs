@@ -5,18 +5,49 @@ namespace PausaVital.Views
 {
     public partial class ClosePromptWindow : Window
     {
-        public string SelectedAction { get; private set; } = string.Empty;
+        public string SelectedAction { get; private set; } = "";
 
         public ClosePromptWindow()
         {
             InitializeComponent();
+            ApplyTranslations();
+        }
+
+        private void ApplyTranslations()
+        {
+            Title = TranslationManager.Get("ClosePromptWindowTitle", "Exit Pausa Vital");
+
+            TitleText.Text = TranslationManager.Get(
+                "ClosePromptTitle",
+                "How do you want to close the app?");
+
+            DescriptionText.Text = TranslationManager.Get(
+                "ClosePromptDescription",
+                "You can keep Pausa Vital running in the background to maintain your streaks, or exit completely.");
+
+            RememberCheckBox.Content = TranslationManager.Get(
+                "ClosePromptRemember",
+                "Remember my choice and don't ask again");
+
+            MinimizeButton.Content = TranslationManager.Get(
+                "ClosePromptMinimize",
+                "Minimize to Tray");
+
+            ExitButton.Content = TranslationManager.Get(
+                "ClosePromptExit",
+                "Exit Completely");
         }
 
         private void OnMinimizeClicked(object sender, RoutedEventArgs e)
         {
             SelectedAction = "Minimize";
 
-            SaveClosePreferenceIfRequested("Minimize");
+            if (RememberCheckBox.IsChecked == true)
+            {
+                var prefs = PreferencesManager.Load();
+                prefs.CloseAction = "Minimize";
+                PreferencesManager.Save(prefs);
+            }
 
             DialogResult = true;
         }
@@ -25,21 +56,14 @@ namespace PausaVital.Views
         {
             SelectedAction = "Exit";
 
-            SaveClosePreferenceIfRequested("Exit");
-
-            DialogResult = true;
-        }
-
-        private void SaveClosePreferenceIfRequested(string action)
-        {
-            if (RememberCheckBox.IsChecked != true)
+            if (RememberCheckBox.IsChecked == true)
             {
-                return;
+                var prefs = PreferencesManager.Load();
+                prefs.CloseAction = "Exit";
+                PreferencesManager.Save(prefs);
             }
 
-            var preferences = PreferencesManager.Load();
-            preferences.CloseAction = action;
-            PreferencesManager.Save(preferences);
+            DialogResult = true;
         }
     }
 }

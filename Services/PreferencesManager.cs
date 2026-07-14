@@ -8,52 +8,35 @@ namespace PausaVital.Services
     {
         public string CloseAction { get; set; } = "Ask";
         public string SelectedMode { get; set; } = "None";
+        public string Language { get; set; } = "es"; // Idioma español
     }
 
     public static class PreferencesManager
     {
-        private static readonly string FilePath = Path.Combine(
-            AppContext.BaseDirectory,
-            "user_preferences.json");
+        private static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "user_preferences.json");
 
         public static AppPreferences Load()
         {
-            if (!File.Exists(FilePath))
+            if (File.Exists(FilePath))
             {
-                return new AppPreferences();
+                try
+                {
+                    string json = File.ReadAllText(FilePath);
+                    return JsonSerializer.Deserialize<AppPreferences>(json) ?? new AppPreferences();
+                }
+                catch { }
             }
-
-            try
-            {
-                string json = File.ReadAllText(FilePath);
-
-                return JsonSerializer.Deserialize<AppPreferences>(json)
-                       ?? new AppPreferences();
-            }
-            catch
-            {
-                return new AppPreferences();
-            }
+            return new AppPreferences();
         }
 
-        public static void Save(AppPreferences preferences)
+        public static void Save(AppPreferences prefs)
         {
             try
             {
-                string json = JsonSerializer.Serialize(
-                    preferences,
-                    new JsonSerializerOptions
-                    {
-                        WriteIndented = true
-                    });
-
+                string json = JsonSerializer.Serialize(prefs);
                 File.WriteAllText(FilePath, json);
             }
-            catch
-            {
-                // Si no puede guardar las preferencias,
-                // la aplicación continuará usando los valores predeterminados.
-            }
+            catch { }
         }
     }
 }

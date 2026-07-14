@@ -28,12 +28,19 @@ namespace PausaVital.Views
 
         public bool IsShuttingDown { get; set; } = false;
         private bool hasShownMinimizeNotification = false;
+        private string connectionStatusKey = "Starting";
+        private string connectionStatusDefaultText = "Starting connection...";
+        private System.Windows.Media.Brush connectionStatusColor = System.Windows.Media.Brushes.Goldenrod;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            TranslationManager.Initialize();
+            ApplyStaticTranslations();
+
             apiService = new ApiService();
+            ;
             backendProcessManager = new BackendProcessManager(apiService);
             breakManager = new BreakManager();
 
@@ -114,8 +121,8 @@ namespace PausaVital.Views
             if (!hasShownMinimizeNotification)
             {
                 App.TrayManager?.ShowNotification(
-                "Pausa Vital",
-                "La aplicación continúa ejecutándose en segundo plano. Haz clic derecho en el icono para salir.");
+                    "Pausa Vital",
+                    TranslationManager.Get("RunningBackground", "Running in background. Right-click tray icon to exit."));
                 hasShownMinimizeNotification = true;
             }
         }
@@ -125,55 +132,33 @@ namespace PausaVital.Views
             ExecuteHideToTray();
         }
 
-
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
+            TranslationManager.Initialize();
 
             var prefs = PreferencesManager.Load();
-            if (string.IsNullOrWhiteSpace(prefs.SelectedMode) ||
-            prefs.SelectedMode == "None")
+            if (string.IsNullOrEmpty(prefs.SelectedMode) || prefs.SelectedMode == "None")
             {
-                var modeWindow = new ModeSelectionWindow
-                {
-                    Owner = this
-                };
-
-                bool? modeWasSelected = modeWindow.ShowDialog();
-
-                if (modeWasSelected != true)
-                {
-                    System.Windows.Application.Current.Shutdown();
-                    return;
-                }
-
+                var modeWindow = new ModeSelectionWindow { Owner = this };
+                modeWindow.ShowDialog();
                 prefs = PreferencesManager.Load();
             }
 
-            string mode;
-
-            if (prefs.SelectedMode == "Pomodoro")
-            {
-                mode = "Pomodoro";
-            }
-            else if (prefs.SelectedMode == "20-20-20")
-            {
-                mode = "20-20-20";
-            }
-            else
-            {
-                System.Windows.MessageBox.Show(
-                    "No se pudo determinar el modo de trabajo. Debes seleccionar uno para continuar.",
-                    "Modo no seleccionado",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-
-                System.Windows.Application.Current.Shutdown();
-                return;
-            }
+            string mode = prefs.SelectedMode == "Pomodoro" ? "Pomodoro" : "20-20-20";
             breakManager.SetMode(mode);
             restDurationSeconds = mode == "Pomodoro" ? 300 : 20;
 
-            UpdateConnectionUI("Iniciando conexión...", System.Windows.Media.Brushes.Goldenrod);
+            if (HideToBackgroundButton != null)
+            {
+                HideToBackgroundButton.Content = TranslationManager.Get("HideToBackgroundBtn", "Hide to Background");
+            }
+
+            if (LangToggleButton != null)
+            {
+                LangToggleButton.Content = prefs.Language == "en" ? "🌐 EN" : "🌐 ES";
+            }
+
+            UpdateConnectionUI("Starting", "Starting connection...", System.Windows.Media.Brushes.Goldenrod);
 
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
             await UpdateConnectionStatusAsync(isConnected);
@@ -182,7 +167,7 @@ namespace PausaVital.Views
         private async void OnReconnectTimerTicked(object? sender, EventArgs e)
         {
             reconnectTimer.Stop();
-            UpdateConnectionUI("Reintentando conexión...", System.Windows.Media.Brushes.Goldenrod);
+            UpdateConnectionUI("Retrying", "Retrying connection...", System.Windows.Media.Brushes.Goldenrod);
 
             bool isConnected = await backendProcessManager.EnsureBackendIsRunningAsync();
             await UpdateConnectionStatusAsync(isConnected);
@@ -191,25 +176,55 @@ namespace PausaVital.Views
         private void OnHydrationTimerTicked(object? sender, EventArgs e)
         {
             App.TrayManager?.ShowNotification(
-                "Recordatorio de hidratación",
-                "Es momento de tomar un vaso de agua para mantenerse sanos y concentrados");
+                "Hydration Reminder",
+                "Time to drink a glass of water to stay healthy and focused!");
         }
-        
 
-        private void UpdateConnectionUI(
-            string text,
-            System.Windows.Media.Brush color)
+        private void ApplyStaticTranslations()
         {
-            ConnectionStatusText.Text = text;
-            ConnectionStatusDot.Fill = color;
+            var prefs = PreferencesManager.Load();
+            TranslationManager.CurrentLanguage = prefs.Language;
+
+            WorkTimeLabel.Text = TranslationManager.Get("WorkTimeLabel", "WORK TIME");
+
+            StreakText.Text = $"{TranslationManager.Get("Streak", "🔥 Streak:")} {cachedStreak}";
+            ShieldsText.Text = $"{TranslationManager.Get("Shields", "🛡️ Shields:")} {cachedShields}";
+
+            HideToBackgroundButton.Content = TranslationManager.Get("HideToBackgroundBtn", "Hide to Background");
+
+            LangToggleButton.Content = prefs.Language == "en" ? "🌐 EN" : "🌐 ES";
+
+            if (isResting)
+            {
+                RestStatusText.Text = $"{TranslationManager.Get("Resting", "RESTING... DO NOT MOVE!")} ({restSecondsRemaining}s)";
+            }
+
+            RefreshConnectionUI();
         }
+
+        private void RefreshConnectionUI()
+        {
+            ConnectionStatusText.Text = TranslationManager.Get(connectionStatusKey, connectionStatusDefaultText);
+            ConnectionStatusDot.Fill = connectionStatusColor;
+        }
+
+        private void UpdateConnectionUI(string key, string defaultText, System.Windows.Media.Brush color)
+        {
+            connectionStatusKey = key;
+            connectionStatusDefaultText = defaultText;
+            connectionStatusColor = color;
+
+            RefreshConnectionUI();
+        }
+
         private async Task UpdateConnectionStatusAsync(bool isConnected)
         {
             if (isConnected)
             {
                 reconnectTimer.Stop();
                 UpdateConnectionUI(
-                    "Conectado",
+                    "Connected",
+                    "Connected",
                     System.Windows.Media.Brushes.MediumSeaGreen);
 
                 currentUserId = await apiService.LoginAsync(Environment.UserName);
@@ -220,7 +235,8 @@ namespace PausaVital.Views
             else
             {
                 UpdateConnectionUI(
-                    "Desconectado. Reintentando...",
+                    "Disconnected",
+                    "Disconnected. Retrying...",
                     System.Windows.Media.Brushes.IndianRed);
 
                 reconnectTimer.Start();
@@ -229,16 +245,13 @@ namespace PausaVital.Views
 
         private async Task UpdateStreakAndShieldsAsync()
         {
-            if (currentUserId == 0)
-            {
-                return;
-            }
+            if (currentUserId == 0) return;
 
             cachedStreak = await apiService.GetCurrentStreakAsync(currentUserId);
-            StreakText.Text = $"🔥 Racha: {cachedStreak}";
+            StreakText.Text = $"{TranslationManager.Get("Streak", "🔥 Streak:")} {cachedStreak}";
 
             cachedShields = await apiService.GetShieldsAsync(currentUserId);
-            ShieldsText.Text = $"🛡️ Escudos: {cachedShields}";
+            ShieldsText.Text = $"{TranslationManager.Get("Shields", "🛡️ Shields:")} {cachedShields}";
         }
 
         private async void OnIdleTimerTicked(object? sender, EventArgs e)
@@ -258,11 +271,9 @@ namespace PausaVital.Views
                 else
                 {
                     restSecondsRemaining--;
-                    RestStatusText.Text =
-                        $"DESCANSANDO... ¡NO TE MUEVAS! ({restSecondsRemaining}s)";
+                    RestStatusText.Text = $"{TranslationManager.Get("Resting", "RESTING... DO NOT MOVE!")} ({restSecondsRemaining}s)";
 
-                    App.TrayManager?.UpdateText(
-                        $"Descanso: {restSecondsRemaining}s restantes"); ;
+                    App.TrayManager?.UpdateText($"Resting: {restSecondsRemaining}s left");
 
                     if (restSecondsRemaining <= 0)
                     {
@@ -275,8 +286,7 @@ namespace PausaVital.Views
             TimeSpan currentWork = breakManager.WorkTime;
             WorkTimeText.Text = $"{currentWork.Minutes:D2}:{currentWork.Seconds:D2}";
 
-            string trayHoverText =
-                $"Trabajo: {currentWork.Minutes:D2}:{currentWork.Seconds:D2} | Racha: {cachedStreak}";
+            string trayHoverText = $"Work: {currentWork.Minutes:D2}:{currentWork.Seconds:D2} | Streak: {cachedStreak}";
             App.TrayManager?.UpdateText(trayHoverText);
 
             if (breakManager.ShouldTakeBreak(idleTime, elapsed))
@@ -291,15 +301,16 @@ namespace PausaVital.Views
             restSecondsRemaining = restDurationSeconds;
 
             RestStatusText.Visibility = Visibility.Visible;
-            RestStatusText.Text =
-                $"DESCANSANDO... ¡NO TE MUEVAS! ({restSecondsRemaining}s)";
+            RestStatusText.Text = $"{TranslationManager.Get("Resting", "RESTING... DO NOT MOVE!")} ({restSecondsRemaining}s)";
+            RestStatusText.Foreground = System.Windows.Media.Brushes.DarkOrange;
 
-            RestStatusText.Foreground =
-                System.Windows.Media.Brushes.DarkOrange;
+            string tip = restDurationSeconds == 300
+                ? "Time for a 5-minute break! Stand up and stretch."
+                : "Look away for 20 seconds! Do not touch the mouse or keyboard.";
 
             App.TrayManager?.ShowNotification(
-                "Hora de descansar",
-                GetBreakTip());
+                TranslationManager.Get("BreakTitle", "Break Time"),
+                tip);
         }
 
         private async Task HandleSuccessfulRestAsync()
@@ -309,25 +320,15 @@ namespace PausaVital.Views
 
             if (currentUserId == 0 || currentHabitId == 0)
             {
-                App.TrayManager?.ShowNotification(
-                    "Pausa Vital",
-                    "El sistema todavía no está listo para registrar el descanso.");
-
+                App.TrayManager?.ShowNotification("Pausa Vital", "Backend is not ready yet.");
                 return;
             }
 
-            bool recorded = await apiService.RecordBreakAsync(
-                currentUserId,
-                currentHabitId,
-                "completed");
-
+            bool recorded = await apiService.RecordBreakAsync(currentUserId, currentHabitId, "completed");
             if (recorded)
             {
                 await UpdateStreakAndShieldsAsync();
-
-                App.TrayManager?.ShowNotification(
-                    "Descanso completado",
-                    "¡Buen trabajo! Tu racha fue actualizada.");
+                App.TrayManager?.ShowNotification("Break Completed", "Great job! Streak updated.");
             }
         }
 
@@ -341,39 +342,25 @@ namespace PausaVital.Views
                 return;
             }
 
-            bool shieldConsumed =
-                await apiService.ConsumeShieldAsync(currentUserId);
+            bool shieldConsumed = await apiService.ConsumeShieldAsync(currentUserId);
 
             if (shieldConsumed)
             {
-                RestStatusText.Text = "¡SALVADO POR UN ESCUDO!";
-                RestStatusText.Foreground =
-                    System.Windows.Media.Brushes.DodgerBlue;
-
-                App.TrayManager?.ShowNotification(
-                    "¡Escudo utilizado!",
-                    "Te moviste antes de terminar, pero un escudo protegió tu racha.");
+                RestStatusText.Text = "SAVED BY SHIELD!";
+                RestStatusText.Foreground = System.Windows.Media.Brushes.DodgerBlue;
+                App.TrayManager?.ShowNotification("Shield Used!", "You moved, but a shield saved your streak!");
             }
             else
             {
-                RestStatusText.Text = "¡RACHA TERMINADA!";
-                RestStatusText.Foreground =
-                    System.Windows.Media.Brushes.Red;
-
-                App.TrayManager?.ShowNotification(
-                    "Racha terminada",
-                    "Te moviste antes de completar el descanso.");
-
-                await apiService.RecordBreakAsync(
-                    currentUserId,
-                    currentHabitId,
-                    "failed");
+                RestStatusText.Text = "STREAK BROKEN!";
+                RestStatusText.Foreground = System.Windows.Media.Brushes.Red;
+                App.TrayManager?.ShowNotification("Streak Broken", "You moved before the 20 seconds were up!");
+                await apiService.RecordBreakAsync(currentUserId, currentHabitId, "failed");
             }
 
             await UpdateStreakAndShieldsAsync();
 
             await Task.Delay(3000);
-
             if (!isResting)
             {
                 RestStatusText.Visibility = Visibility.Collapsed;
@@ -388,11 +375,22 @@ namespace PausaVital.Views
             backendProcessManager.Dispose();
         }
 
-        private string GetBreakTip()
+        private async void OnLangToggleClicked(object sender, RoutedEventArgs e)
         {
-            return restDurationSeconds == 300
-                ? "¡Hora de tomar un descanso de 5 minutos! Levántate y estírate."
-                : "Mira a lo lejos durante 20 segundos. No muevas el mouse ni uses el teclado.";
+            var prefs = PreferencesManager.Load();
+
+            prefs.Language = prefs.Language == "en" ? "es" : "en";
+            PreferencesManager.Save(prefs);
+
+            TranslationManager.CurrentLanguage = prefs.Language;
+
+            ApplyStaticTranslations();
+            App.TrayManager?.RefreshTexts();
+
+            if (currentUserId != 0)
+            {
+                await UpdateStreakAndShieldsAsync();
+            }
         }
     }
 }

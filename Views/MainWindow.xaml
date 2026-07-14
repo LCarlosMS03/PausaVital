@@ -19,17 +19,17 @@
 			</Border.Effect>
 
 			<StackPanel VerticalAlignment="Center">
-				<TextBlock Name="RestStatusText" Text="DESCANSANDO... ¡NO TE MUEVAS!" FontSize="14" FontWeight="Bold" Foreground="DarkOrange" HorizontalAlignment="Center" Margin="0,0,0,10" Visibility="Collapsed"/>
+				<TextBlock Name="RestStatusText" Text="RESTING... DO NOT MOVE!" FontSize="14" FontWeight="Bold" Foreground="DarkOrange" HorizontalAlignment="Center" Margin="0,0,0,10" Visibility="Collapsed"/>
 
-                <TextBlock Name="WorkTimeLabel" Text="TIEMPO DE TRABAJO" FontSize="12" FontWeight="SemiBold" Foreground="#95A5A6" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                <TextBlock Name="WorkTimeLabel" Text="WORK TIME" FontSize="12" FontWeight="SemiBold" Foreground="#95A5A6" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                 <TextBlock Name="WorkTimeText" Text="00:00" FontSize="48" FontWeight="Light" Foreground="#2980B9" HorizontalAlignment="Center" Margin="0,0,0,25"/>
 
 				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-					<TextBlock Name="StreakText" Text="🔥 Racha: 0" FontSize="16" FontWeight="SemiBold" Foreground="#E67E22" Margin="0,0,20,0"/>
-					<TextBlock Name="ShieldsText" Text="🛡️ Escudos: 0" FontSize="16" FontWeight="SemiBold" Foreground="#F1C40F"/>
+					<TextBlock Name="StreakText" Text="🔥 Streak: 0" FontSize="16" FontWeight="SemiBold" Foreground="#E67E22" Margin="0,0,20,0"/>
+					<TextBlock Name="ShieldsText" Text="🛡️ Shields: 0" FontSize="16" FontWeight="SemiBold" Foreground="#F1C40F"/>
 				</StackPanel>
 
-				<Button Name="HideToBackgroundButton" Content="Minimizar al fondo" Background="#ECF0F1" Foreground="#34495E" BorderThickness="0" Padding="10" Margin="0,30,0,0" Cursor="Hand" Click="OnHideToTrayButtonClicked">
+				<Button Name="HideToBackgroundButton" Content="Hide to Background" Background="#ECF0F1" Foreground="#34495E" BorderThickness="0" Padding="10" Margin="0,30,0,0" Cursor="Hand" Click="OnHideToTrayButtonClicked">
 					<Button.Resources>
 						<Style TargetType="Border">
 							<Setter Property="CornerRadius" Value="8"/>
@@ -39,11 +39,15 @@
 			</StackPanel>
 		</Border>
 
-        <Border Grid.Row="2" Background="#E8ECEF">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Ellipse Name="ConnectionStatusDot" Width="8" Height="8" Fill="Goldenrod" Margin="0,0,6,0"/>
-                <TextBlock Name="ConnectionStatusText" Text="Iniciando conexión..." FontSize="11" Foreground="#7F8C8D"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+		<Border Grid.Row="2" Background="#E8ECEF">
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+				<Ellipse Name="ConnectionStatusDot" Width="8" Height="8" Fill="Goldenrod" Margin="0,0,6,0"/>
+				<TextBlock Name="ConnectionStatusText" Text="Connecting..." FontSize="11" Foreground="#7F8C8D"/>
+			</StackPanel>
+		</Border>
+
+		<Button Name="LangToggleButton" Content="🌐 ES" Click="OnLangToggleClicked"
+        Background="Transparent" Foreground="#7F8C8D" BorderThickness="0"
+        Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" FontSize="12" FontWeight="SemiBold"/>
+	</Grid>
 </Window>
