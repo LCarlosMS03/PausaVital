@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,34 +13,6 @@ namespace PausaVital.Services
         public BackendProcessManager(ApiService apiService)
         {
             this.apiService = apiService;
-        }
-
-        private void ExtractBackendResource()
-        {
-            string targetFolder = Path.Combine(AppContext.BaseDirectory, "Backend");
-            string targetPath = Path.Combine(targetFolder, "PausaVitalBackend.exe");
-
-            if (!Directory.Exists(targetFolder))
-            {
-                Directory.CreateDirectory(targetFolder);
-            }
-
-            if (!File.Exists(targetPath))
-            {
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-
-                string resourceName = "PausaVital.PausaVitalBackend.exe";
-
-                using (Stream? resourceStream = assembly.GetManifestResourceStream(resourceName))
-                {
-                    if (resourceStream == null) return;
-
-                    using (FileStream fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
-                    {
-                        resourceStream.CopyTo(fileStream);
-                    }
-                }
-            }
         }
 
         public async Task<bool> EnsureBackendIsRunningAsync()

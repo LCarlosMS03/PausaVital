@@ -1,53 +1,112 @@
-﻿<Window x:Class="PausaVital.Views.MainWindow"
+<Window x:Class="PausaVital.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Pausa Vital" Height="400" Width="350"
+        Title="Pausa Vital"
+        Height="400"
+        Width="350"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize">
-	<Grid Background="#F0F4F8">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="30"/>
-		</Grid.RowDefinitions>
+    <Grid Background="#F0F4F8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
 
-		<TextBlock Text="Pausa Vital" FontSize="22" FontWeight="Bold" Foreground="#2C3E50" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+        <TextBlock Text="Pausa Vital"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   Foreground="#2C3E50"
+                   HorizontalAlignment="Center"
+                   Margin="0,20,0,0"/>
 
-		<Border Grid.Row="1" Background="White" CornerRadius="15" Margin="25,15" Padding="20">
-			<Border.Effect>
-				<DropShadowEffect Color="Black" Opacity="0.05" BlurRadius="10" ShadowDepth="2"/>
-			</Border.Effect>
+        <Border Grid.Row="1"
+                Background="White"
+                CornerRadius="15"
+                Margin="25,15"
+                Padding="20">
+            <Border.Effect>
+                <DropShadowEffect Color="Black"
+                                  Opacity="0.05"
+                                  BlurRadius="10"
+                                  ShadowDepth="2"/>
+            </Border.Effect>
 
-			<StackPanel VerticalAlignment="Center">
-				<TextBlock Name="RestStatusText" Text="RESTING... DO NOT MOVE!" FontSize="14" FontWeight="Bold" Foreground="DarkOrange" HorizontalAlignment="Center" Margin="0,0,0,10" Visibility="Collapsed"/>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock x:Name="RestStatusText"
+                           Text="DESCANSANDO... ¡NO TE MUEVAS!"
+                           FontSize="14"
+                           FontWeight="Bold"
+                           Foreground="DarkOrange"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,10"
+                           Visibility="Collapsed"/>
 
-                <TextBlock Name="WorkTimeLabel" Text="WORK TIME" FontSize="12" FontWeight="SemiBold" Foreground="#95A5A6" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                <TextBlock Name="WorkTimeText" Text="00:00" FontSize="48" FontWeight="Light" Foreground="#2980B9" HorizontalAlignment="Center" Margin="0,0,0,25"/>
+                <TextBlock x:Name="WorkTimeLabel"
+                           Text="TIEMPO DE TRABAJO"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="#95A5A6"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,5"/>
 
-				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-					<TextBlock Name="StreakText" Text="🔥 Streak: 0" FontSize="16" FontWeight="SemiBold" Foreground="#E67E22" Margin="0,0,20,0"/>
-					<TextBlock Name="ShieldsText" Text="🛡️ Shields: 0" FontSize="16" FontWeight="SemiBold" Foreground="#F1C40F"/>
-				</StackPanel>
+                <TextBlock x:Name="WorkTimeText"
+                           Text="00:00"
+                           FontSize="48"
+                           FontWeight="Light"
+                           Foreground="#2980B9"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,25"/>
 
-				<Button Name="HideToBackgroundButton" Content="Hide to Background" Background="#ECF0F1" Foreground="#34495E" BorderThickness="0" Padding="10" Margin="0,30,0,0" Cursor="Hand" Click="OnHideToTrayButtonClicked">
-					<Button.Resources>
-						<Style TargetType="Border">
-							<Setter Property="CornerRadius" Value="8"/>
-						</Style>
-					</Button.Resources>
-				</Button>
-			</StackPanel>
-		</Border>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <TextBlock x:Name="StreakText"
+                               Text="🔥 Racha: 0"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="#E67E22"
+                               Margin="0,0,20,0"/>
 
-		<Border Grid.Row="2" Background="#E8ECEF">
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-				<Ellipse Name="ConnectionStatusDot" Width="8" Height="8" Fill="Goldenrod" Margin="0,0,6,0"/>
-				<TextBlock Name="ConnectionStatusText" Text="Connecting..." FontSize="11" Foreground="#7F8C8D"/>
-			</StackPanel>
-		</Border>
+                    <TextBlock x:Name="ShieldsText"
+                               Text="🛡️ Escudos: 0"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="#F1C40F"/>
+                </StackPanel>
 
-		<Button Name="LangToggleButton" Content="🌐 ES" Click="OnLangToggleClicked"
-        Background="Transparent" Foreground="#7F8C8D" BorderThickness="0"
-        Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" FontSize="12" FontWeight="SemiBold"/>
-	</Grid>
+                <Button x:Name="HideToBackgroundButton"
+                        Content="Minimizar al fondo"
+                        Background="#ECF0F1"
+                        Foreground="#34495E"
+                        BorderThickness="0"
+                        Padding="10"
+                        Margin="0,30,0,0"
+                        Cursor="Hand"
+                        Click="OnHideToTrayButtonClicked">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Background="#E8ECEF">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <Ellipse x:Name="ConnectionStatusDot"
+                         Width="8"
+                         Height="8"
+                         Fill="Goldenrod"
+                         Margin="0,0,6,0"/>
+
+                <TextBlock x:Name="ConnectionStatusText"
+                           Text="Iniciando conexión..."
+                           FontSize="11"
+                           Foreground="#7F8C8D"/>
+            </StackPanel>
+        </Border>
+    </Grid>
 </Window>
