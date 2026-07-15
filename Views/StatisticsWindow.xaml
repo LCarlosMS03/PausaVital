@@ -154,33 +154,6 @@
             </Grid>
         </StackPanel>
 
-        <Border Grid.Row="2"
-                Background="#E8ECEF"
-                CornerRadius="8"
-                Padding="10"
-                Margin="0,20,0,0">
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Center">
-                <TextBlock Text="&#xE823;"
-                           FontFamily="Segoe MDL2 Assets"
-                           FontSize="14"
-                           Foreground="#7F8C8D"
-                           Margin="0,0,8,0"
-                           VerticalAlignment="Center"/>
-                <TextBlock Text="Inactividad del sistema: "
-                           FontSize="12"
-                           FontWeight="SemiBold"
-                           Foreground="#7F8C8D"
-                           VerticalAlignment="Center"/>
-                <TextBlock x:Name="LiveIdleText"
-                           Text="00:00"
-                           FontSize="12"
-                           FontWeight="Bold"
-                           Foreground="#34495E"
-                           VerticalAlignment="Center"/>
-            </StackPanel>
-        </Border>
-
         <Button Grid.Row="3"
                 Background="#ECF0F1"
                 Foreground="#34495E"

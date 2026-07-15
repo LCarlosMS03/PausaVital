@@ -9,7 +9,6 @@ namespace PausaVital.Views
     {
         private readonly ApiService apiService;
         private readonly int userId;
-        private readonly DispatcherTimer liveTimer;
 
         public StatisticsWindow(int userId)
         {
@@ -20,12 +19,6 @@ namespace PausaVital.Views
 
             Loaded += OnWindowLoaded;
             Closed += OnWindowClosed;
-
-            liveTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            liveTimer.Tick += OnLiveTimerTicked;
         }
 
         private async void OnWindowLoaded(
@@ -41,18 +34,6 @@ namespace PausaVital.Views
                 CompletedText.Text = stats.Value.completed.ToString();
                 FailedText.Text = stats.Value.failed.ToString();
             }
-
-            liveTimer.Start();
-        }
-
-        private void OnLiveTimerTicked(
-            object? sender,
-            EventArgs e)
-        {
-            TimeSpan idleTime = ActivityMonitor.GetIdleTime();
-
-            LiveIdleText.Text =
-                $"{(int)idleTime.TotalMinutes:D2}:{idleTime.Seconds:D2}";
         }
 
         private void OnCloseButtonClicked(
@@ -64,7 +45,6 @@ namespace PausaVital.Views
 
         private void OnWindowClosed(object? sender, EventArgs e)
         {
-            liveTimer.Stop();
         }
     }
 }

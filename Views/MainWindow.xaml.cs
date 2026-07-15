@@ -309,6 +309,8 @@ namespace PausaVital.Views
 
             TimeSpan idleTime = ActivityMonitor.GetIdleTime();
 
+            IdleTimeText.Text = FormatTime(idleTime);
+
             if (isResting)
             {
                 if (idleTime.TotalSeconds < 1.0)
@@ -346,6 +348,16 @@ namespace PausaVital.Views
             {
                 StartRestMode();
             }
+        }
+
+        private static string FormatTime(TimeSpan time)
+        {
+            if (time.TotalHours >= 1)
+            {
+                return $"{(int)time.TotalHours:D2}:{time.Minutes:D2}:{time.Seconds:D2}";
+            }
+
+            return $"{(int)time.TotalMinutes:D2}:{time.Seconds:D2}";
         }
 
         private void StartRestMode()
