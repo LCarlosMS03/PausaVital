@@ -1,6 +1,7 @@
 <Window x:Class="PausaVital.Views.ClosePromptWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="/Assets/Icons/PausaVital.ico"
         Title="Salir de Pausa Vital"
         Height="260"
         Width="470"

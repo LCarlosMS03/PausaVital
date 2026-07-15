@@ -410,7 +410,7 @@ namespace PausaVital.Views
 
             App.TrayManager?.ShowNotification(
                 "Hora de descansar",
-                $"{GetBreakTip()} Tienes {RestGraceDurationSeconds} segundos para prepararte.");
+                $"{GetBreakTip()}");
         }
 
         private async Task HandleSuccessfulRestAsync()

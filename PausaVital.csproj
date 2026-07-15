@@ -1,20 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<UseWPF>true</UseWPF>
-		<UseWindowsForms>true</UseWindowsForms>
-	</PropertyGroup>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
 
-	<ItemGroup>
-		<None Remove="Backend\**\*.*" />
-		<Content Include="Backend\**\*.*"
-				 Exclude="Backend\__pycache__\**;Backend\*.sqlite;Backend\build\**;Backend\dist\**">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
+    <ApplicationIcon>Assets\Icons\PausaVital.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Backend\**\*.*" />
+
+    <Content Include="Backend\**\*.*" Exclude="Backend\__pycache__\**;Backend\*.sqlite;Backend\build\**;Backend\dist\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Icons\Exit.ico" />
+    <None Remove="Assets\Icons\PausaVital.ico" />
+    <None Remove="Assets\Icons\ShowPanel.ico" />
+    <None Remove="Assets\Icons\statistics.ico" />
+    <Resource Include="Assets\Icons\Exit.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+
+    <Resource Include="Assets\Icons\PausaVital.ico" />
+
+    <Resource Include="Assets\Icons\ShowPanel.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Icons\statistics.ico" />
+  </ItemGroup>
 
 </Project>

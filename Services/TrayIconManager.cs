@@ -1,8 +1,11 @@
+using PausaVital.Views;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Forms;
-using PausaVital.Views;
+using DrawingIcon = System.Drawing.Icon;
+using DrawingImage = System.Drawing.Image;
 using WinDrawingFontStyle = System.Drawing.FontStyle;
 
 namespace PausaVital.Services
@@ -13,14 +16,50 @@ namespace PausaVital.Services
         private readonly Window dashboardWindow;
         private readonly ContextMenuStrip contextMenu;
 
+        private readonly DrawingIcon trayIcon;
+        private readonly DrawingIcon statisticsIcon;
+        private readonly DrawingIcon showPanelIcon;
+        private readonly DrawingIcon exitIcon;
+
+        private readonly DrawingImage statisticsMenuImage;
+        private readonly DrawingImage showPanelMenuImage;
+        private readonly DrawingImage exitMenuImage;
+
         public TrayIconManager(Window window)
         {
             dashboardWindow = window;
+
+            trayIcon = LoadResourceIcon(
+                "Assets/Icons/PausaVital.ico",
+                 SystemIcons.Application);
+
+            statisticsIcon = LoadResourceIcon(
+                "Assets/Icons/statistics.ico",
+                SystemIcons.Information);
+
+            showPanelIcon = LoadResourceIcon(
+                "Assets/Icons/ShowPanel.ico",
+                 SystemIcons.Application);
+
+            exitIcon = LoadResourceIcon(
+                "Assets/Icons/Exit.ico",
+                SystemIcons.Error);
+
+            statisticsMenuImage = statisticsIcon.ToBitmap();
+            showPanelMenuImage = showPanelIcon.ToBitmap();
+            statisticsMenuImage = statisticsIcon.ToBitmap();
+            exitMenuImage = exitIcon.ToBitmap();
+
             contextMenu = new ContextMenuStrip();
+
+            contextMenu.ImageScalingSize =
+                new System.Drawing.Size(18, 18);
 
             var showMenuItem = new ToolStripMenuItem
             {
-                Text = "Mostrar panel"
+                Text = "Mostrar panel",
+                Image = showPanelMenuImage,
+                ImageScaling = ToolStripItemImageScaling.SizeToFit
             };
             showMenuItem.Font = new Font(
                 showMenuItem.Font,
@@ -29,13 +68,18 @@ namespace PausaVital.Services
 
             var statsMenuItem = new ToolStripMenuItem
             {
-                Text = "Estadísticas avanzadas"
+                Text = "Estadísticas avanzadas",
+                Image = statisticsMenuImage,
+                ImageScaling =
+                        ToolStripItemImageScaling.SizeToFit
             };
             statsMenuItem.Click += (_, _) => ShowStatisticsWindow();
 
             var exitMenuItem = new ToolStripMenuItem
             {
-                Text = "Salir"
+                Text = "Salir",
+                Image = exitMenuImage,
+                ImageScaling = ToolStripItemImageScaling.SizeToFit
             };
             exitMenuItem.Click += (_, _) => ExitApplication();
 
@@ -46,7 +90,7 @@ namespace PausaVital.Services
 
             systemTrayIcon = new NotifyIcon
             {
-                Icon = SystemIcons.Information,
+                Icon = trayIcon,
                 Visible = true,
                 Text = "Pausa Vital",
                 ContextMenuStrip = contextMenu
@@ -77,6 +121,36 @@ namespace PausaVital.Services
             };
 
             statsWindow.ShowDialog();
+        }
+
+        // ICONOS
+        private static DrawingIcon LoadResourceIcon(
+              string resourcePath,
+              DrawingIcon fallbackIcon)
+        {
+            try
+            {
+                var resourceUri = new Uri(
+                    $"pack://application:,,,/{resourcePath}",
+                    UriKind.Absolute);
+
+                var resource = System.Windows.Application
+                    .GetResourceStream(resourceUri);
+
+                if (resource?.Stream is null)
+                {
+                    return (DrawingIcon)fallbackIcon.Clone();
+                }
+
+                using var temporaryIcon =
+                    new DrawingIcon(resource.Stream);
+
+                return (DrawingIcon)temporaryIcon.Clone();
+            }
+            catch
+            {
+                return (DrawingIcon)fallbackIcon.Clone();
+            }
         }
 
         public void UpdateText(string text)
@@ -124,8 +198,18 @@ namespace PausaVital.Services
         public void Dispose()
         {
             systemTrayIcon.Visible = false;
-            contextMenu.Dispose();
+
             systemTrayIcon.Dispose();
+            contextMenu.Dispose();
+
+            showPanelMenuImage.Dispose();
+            statisticsMenuImage.Dispose();
+            exitMenuImage.Dispose();
+
+            showPanelIcon.Dispose();
+            statisticsIcon.Dispose();
+            exitIcon.Dispose();
+            trayIcon.Dispose();
         }
     }
 }
