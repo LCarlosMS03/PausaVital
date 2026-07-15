@@ -19,6 +19,10 @@ namespace PausaVital.Views
         private bool isResting;
         private bool hydrationPending = false;
 
+        private const int RestGraceDurationSeconds = 5;
+        private int restGraceSecondsRemaining = 0;
+        private bool isInRestGracePeriod = false;
+
         private int restSecondsRemaining;
         private int restDurationSeconds = 20;
         private int currentHabitId;
@@ -313,24 +317,53 @@ namespace PausaVital.Views
 
             if (isResting)
             {
+                // Periodo de tolerancia: cualquier movimiento se ignora.
+                if (isInRestGracePeriod)
+                {
+                    restGraceSecondsRemaining--;
+
+                    int secondsToShow = Math.Max(
+                        restGraceSecondsRemaining,
+                        0);
+
+                    RestStatusText.Text =
+                        $"PREPÁRATE PARA DESCANSAR... ({secondsToShow}s)";
+
+                    App.TrayManager?.UpdateText(
+                        $"El descanso comienza en {secondsToShow}s");
+
+                    if (restGraceSecondsRemaining <= 0)
+                    {
+                        isInRestGracePeriod = false;
+
+                        RestStatusText.Text =
+                            $"DESCANSANDO... ¡NO TE MUEVAS! ({restSecondsRemaining}s)";
+
+                        App.TrayManager?.UpdateText(
+                            $"Descanso: {restSecondsRemaining}s restantes");
+                    }
+
+                    return;
+                }
+
+                // El movimiento solamente se evalúa después de la tolerancia.
                 if (idleTime.TotalSeconds < 1.0)
                 {
                     await HandleFailedRestAsync();
+                    return;
                 }
-                else
+
+                restSecondsRemaining--;
+
+                RestStatusText.Text =
+                    $"DESCANSANDO... ¡NO TE MUEVAS! ({restSecondsRemaining}s)";
+
+                App.TrayManager?.UpdateText(
+                    $"Descanso: {restSecondsRemaining}s restantes");
+
+                if (restSecondsRemaining <= 0)
                 {
-                    restSecondsRemaining--;
-
-                    RestStatusText.Text =
-                        $"DESCANSANDO... ¡NO TE MUEVAS! ({restSecondsRemaining}s)";
-
-                    App.TrayManager?.UpdateText(
-                        $"Descanso: {restSecondsRemaining}s restantes");
-
-                    if (restSecondsRemaining <= 0)
-                    {
-                        await HandleSuccessfulRestAsync();
-                    }
+                    await HandleSuccessfulRestAsync();
                 }
 
                 return;
@@ -363,23 +396,28 @@ namespace PausaVital.Views
         private void StartRestMode()
         {
             isResting = true;
+            isInRestGracePeriod = true;
+
+            restGraceSecondsRemaining = RestGraceDurationSeconds;
             restSecondsRemaining = restDurationSeconds;
 
             RestStatusText.Visibility = Visibility.Visible;
             RestStatusText.Text =
-                $"DESCANSANDO... ¡NO TE MUEVAS! ({restSecondsRemaining}s)";
+                $"PREPÁRATE PARA DESCANSAR... ({restGraceSecondsRemaining}s)";
 
             RestStatusText.Foreground =
                 System.Windows.Media.Brushes.DarkOrange;
 
             App.TrayManager?.ShowNotification(
                 "Hora de descansar",
-                GetBreakTip());
+                $"{GetBreakTip()} Tienes {RestGraceDurationSeconds} segundos para prepararte.");
         }
 
         private async Task HandleSuccessfulRestAsync()
         {
             isResting = false;
+            isInRestGracePeriod = false;
+            restGraceSecondsRemaining = 0;
             RestStatusText.Visibility = Visibility.Collapsed;
 
             if (currentUserId == 0 || currentHabitId == 0)
@@ -413,6 +451,8 @@ namespace PausaVital.Views
         private async Task HandleFailedRestAsync()
         {
             isResting = false;
+            isInRestGracePeriod = false;
+            restGraceSecondsRemaining = 0;
 
             if (currentUserId == 0 || currentHabitId == 0)
             {

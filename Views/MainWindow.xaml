@@ -82,12 +82,13 @@
 
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Center">
+
                     <TextBlock x:Name="StreakText"
                                Text="🔥 Racha: 0"
                                FontSize="16"
                                FontWeight="SemiBold"
                                Foreground="#E67E22"
-                               RenderTransformOrigin="0.509,1.976"/>
+                               Margin="0,0,24,0"/>
 
                     <TextBlock x:Name="ShieldsText"
                                Text="🛡️ Escudos: 0"
