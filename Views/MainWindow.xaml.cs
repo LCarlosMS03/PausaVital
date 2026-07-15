@@ -17,6 +17,8 @@ namespace PausaVital.Views
 
         private DateTime lastTickTime = DateTime.UtcNow;
         private bool isResting;
+        private bool hydrationPending = false;
+
         private int restSecondsRemaining;
         private int restDurationSeconds = 20;
         private int currentHabitId;
@@ -215,13 +217,33 @@ namespace PausaVital.Views
             await UpdateConnectionStatusAsync(isConnected);
         }
 
-        private void OnHydrationTimerTicked(
-            object? sender,
-            EventArgs e)
+        private void OnHydrationTimerTicked(object? sender, EventArgs e)
+        {
+            if (isResting)
+            {
+                hydrationPending = true;
+                return;
+            }
+
+            ShowHydrationNotification();
+        }
+
+        private void ShowHydrationNotification()
         {
             App.TrayManager?.ShowNotification(
-                "Recordatorio de hidratación",
-                "Es momento de tomar un vaso de agua para mantenerte saludable y concentrado.");
+                "¡ES HORA DE HIDRATARSE!",
+                "Toma un vaso de agua para mantenerte saludable y concentrado.");
+        }
+
+        private void ShowPendingHydration()
+        {
+            if (!hydrationPending)
+            {
+                return;
+            }
+
+            hydrationPending = false;
+            ShowHydrationNotification();
         }
 
         private void UpdateConnectionUI(
@@ -354,6 +376,8 @@ namespace PausaVital.Views
                     "Pausa Vital",
                     "El sistema todavía no está listo para registrar el descanso.");
 
+                ShowPendingHydration();
+
                 return;
             }
 
@@ -414,6 +438,7 @@ namespace PausaVital.Views
             }
 
             await UpdateStreakAndShieldsAsync();
+            ShowPendingHydration();
             await Task.Delay(3000);
 
             if (!isResting)
