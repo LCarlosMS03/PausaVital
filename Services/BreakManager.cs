@@ -20,7 +20,7 @@ namespace PausaVital.Services
             }
             else
             {
-                workThreshold = TimeSpan.FromMinutes(20);
+                workThreshold = TimeSpan.FromSeconds(10);
             }
         }
 
