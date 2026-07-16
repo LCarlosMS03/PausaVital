@@ -10,7 +10,6 @@
 * **Motor de Gamificación:** Sistema de rachas por descansos completados y una economía de recompensas automatizada que otorga "Escudos protectores" para salvar rachas perdidas.
 * **Monitoreo Pasivo:** Ejecución silenciosa desde el *System Tray* (Bandeja del sistema) de Windows con alertas nativas no intrusivas.
 * **Alertas de Hidratación:** Recordatorios automatizados para fomentar el consumo regular de agua.
-* **Interfaz Bilingüe (L10n):** Soporte dinámico para Inglés y Español en la interfaz gráfica, intercambiable en tiempo real.
 
 ## Arquitectura y Tecnologías
 
