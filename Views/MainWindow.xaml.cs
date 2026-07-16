@@ -418,7 +418,7 @@ namespace PausaVital.Views
             isResting = false;
             isInRestGracePeriod = false;
             restGraceSecondsRemaining = 0;
-            RestStatusText.Visibility = Visibility.Collapsed;
+            RestStatusText.Visibility = Visibility.Hidden;
 
             if (currentUserId == 0 || currentHabitId == 0)
             {
@@ -495,7 +495,7 @@ namespace PausaVital.Views
 
             if (!isResting)
             {
-                RestStatusText.Visibility = Visibility.Collapsed;
+                RestStatusText.Visibility = Visibility.Hidden;
             }
         }
 

@@ -3,33 +3,37 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Icon="/Assets/Icons/PausaVital.ico"
         Title="Pausa Vital"
-        Height="493"
+        Height="520"
         Width="408"
+        MinHeight="520"
+        MinWidth="408"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize">
-    <Grid Background="#F0F4F8" Margin="0,0,0,-6">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="19*"/>
-            <ColumnDefinition Width="117*"/>
-        </Grid.ColumnDefinitions>
+
+    <Grid Background="#F0F4F8">
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="78"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="34"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Pausa Vital"
-                   FontSize="22"
+        <!-- Título -->
+        <TextBlock Grid.Row="0"
+                   Text="Pausa Vital"
+                   FontSize="24"
                    FontWeight="Bold"
                    Foreground="#2C3E50"
-                   HorizontalAlignment="Left"
-                   Margin="90,10,0,10" Grid.Column="1"/>
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
 
-        <Border
+        <!-- Tarjeta principal -->
+        <Border Grid.Row="1"
                 Background="White"
                 CornerRadius="15"
-                Margin="25,49,25,20"
-                Padding="20" Grid.RowSpan="2" Grid.ColumnSpan="2">
+                Margin="25,0,25,18"
+                Padding="22">
+
             <Border.Effect>
                 <DropShadowEffect Color="Black"
                                   Opacity="0.05"
@@ -37,16 +41,24 @@
                                   ShadowDepth="2"/>
             </Border.Effect>
 
-            <StackPanel VerticalAlignment="Center" Height="276">
-                <TextBlock x:Name="RestStatusText"
-                           Text="DESCANSANDO... ¡NO TE MUEVAS!"
-                           FontSize="14"
-                           FontWeight="Bold"
-                           Foreground="DarkOrange"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,10"
-                           Visibility="Collapsed"/>
+            <StackPanel VerticalAlignment="Center">
 
+                <!-- Mensaje de descanso reservado -->
+                <Grid Height="34"
+                      Margin="0,0,0,4">
+
+                    <TextBlock x:Name="RestStatusText"
+                               Text="DESCANSANDO... ¡NO TE MUEVAS!"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="DarkOrange"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextAlignment="Center"
+                               Visibility="Hidden"/>
+                </Grid>
+
+                <!-- Tiempo de trabajo -->
                 <TextBlock x:Name="WorkTimeLabel"
                            Text="TIEMPO DE TRABAJO"
                            FontSize="12"
@@ -61,16 +73,17 @@
                            FontWeight="Light"
                            Foreground="#2980B9"
                            HorizontalAlignment="Center"
-                           Margin="0,0,0,25"/>
+                           Margin="0,0,0,18"/>
 
-                <StackPanel Margin="0,0,0,30"
-                            HorizontalAlignment="Center">
+                <!-- Tiempo de inactividad -->
+                <StackPanel HorizontalAlignment="Center"
+                            Margin="0,0,0,24">
 
                     <TextBlock Text="TIEMPO DE INACTIVIDAD"
                                FontSize="11"
                                FontWeight="SemiBold"
-                               Foreground="#95A5A6" Height="14"
-                               />
+                               Foreground="#95A5A6"
+                               HorizontalAlignment="Center"/>
 
                     <TextBlock x:Name="IdleTimeText"
                                Text="00:00"
@@ -81,6 +94,7 @@
                                Margin="0,3,0,0"/>
                 </StackPanel>
 
+                <!-- Racha y escudos -->
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Center">
 
@@ -98,28 +112,36 @@
                                Foreground="#F1C40F"/>
                 </StackPanel>
 
+                <!-- Botón minimizar -->
                 <Button x:Name="HideToBackgroundButton"
                         Content="Minimizar al fondo"
+                        Height="40"
                         Background="#ECF0F1"
                         Foreground="#34495E"
                         BorderThickness="0"
-                        Padding="10"
-                        Margin="0,30,0,0"
+                        Margin="0,28,0,0"
                         Cursor="Hand"
                         Click="OnHideToTrayButtonClicked">
+
                     <Button.Resources>
                         <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="8"/>
+                            <Setter Property="CornerRadius"
+                                    Value="8"/>
                         </Style>
                     </Button.Resources>
                 </Button>
+
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="1" Background="#E8ECEF" Grid.ColumnSpan="2" Height="29" VerticalAlignment="Top" Margin="0,378,0,0" Grid.RowSpan="2">
+        <!-- Estado de conexión -->
+        <Border Grid.Row="2"
+                Background="#E8ECEF">
+
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center">
+
                 <Ellipse x:Name="ConnectionStatusDot"
                          Width="8"
                          Height="8"
@@ -132,5 +154,6 @@
                            Foreground="#7F8C8D"/>
             </StackPanel>
         </Border>
+
     </Grid>
 </Window>
