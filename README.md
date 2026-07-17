@@ -10,6 +10,7 @@
 * **Motor de Gamificación:** Sistema de rachas por descansos completados y una economía de recompensas automatizada que otorga "Escudos protectores" para salvar rachas perdidas.
 * **Monitoreo Pasivo:** Ejecución silenciosa desde el *System Tray* (Bandeja del sistema) de Windows con alertas nativas no intrusivas.
 * **Alertas de Hidratación:** Recordatorios automatizados para fomentar el consumo regular de agua.
+* **Interfaz Bilingüe (L10n):** Soporte dinámico para Inglés y Español en la interfaz gráfica, intercambiable en tiempo real.
 
 ## Arquitectura y Tecnologías
 
@@ -25,6 +26,6 @@ El proyecto emplea una arquitectura híbrida que separa la capa de presentación
 Pausa Vital está optimizado para funcionar en cualquier equipo sin configuraciones previas:
 
 1. Dirígete a la sección de [Releases](../../releases) a la derecha de este repositorio.
-2. Descarga el extraible "PausaVital X.X.X.zip".
+2. Descarga el extraible "PausaVital 1.2.0.zip".
 3. Extraer el .zip
 3. Ejecuta el programa "PausaVital.exe" directamente.

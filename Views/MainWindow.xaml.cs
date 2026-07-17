@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -29,6 +29,8 @@ namespace PausaVital.Views
         private int cachedStreak;
         private int cachedShields;
         private bool hasShownMinimizeNotification;
+        private ExerciseWindow? exerciseWindow;
+        private bool exerciseWindowShown;
 
         public int currentUserId { get; private set; }
         public bool IsShuttingDown { get; set; }
@@ -341,6 +343,14 @@ namespace PausaVital.Views
 
                         App.TrayManager?.UpdateText(
                             $"Descanso: {restSecondsRemaining}s restantes");
+
+                        if (!exerciseWindowShown)
+                        {
+                            exerciseWindow = new ExerciseWindow();
+                            exerciseWindow.Show();
+
+                            exerciseWindowShown = true;
+                        }
                     }
 
                     return;
@@ -398,6 +408,8 @@ namespace PausaVital.Views
             isResting = true;
             isInRestGracePeriod = true;
 
+            exerciseWindowShown = false;
+
             restGraceSecondsRemaining = RestGraceDurationSeconds;
             restSecondsRemaining = restDurationSeconds;
 
@@ -410,11 +422,13 @@ namespace PausaVital.Views
 
             App.TrayManager?.ShowNotification(
                 "Hora de descansar",
-                $"{GetBreakTip()}");
+                GetBreakTip());
         }
 
         private async Task HandleSuccessfulRestAsync()
         {
+            exerciseWindow?.Close();
+            exerciseWindow = null;
             isResting = false;
             isInRestGracePeriod = false;
             restGraceSecondsRemaining = 0;
@@ -443,6 +457,7 @@ namespace PausaVital.Views
 
             await UpdateStreakAndShieldsAsync();
 
+
             App.TrayManager?.ShowNotification(
                 "Descanso completado",
                 "¡Buen trabajo! Tu racha fue actualizada.");
@@ -450,13 +465,15 @@ namespace PausaVital.Views
 
         private async Task HandleFailedRestAsync()
         {
+            exerciseWindow?.Close();
+            exerciseWindow = null;
             isResting = false;
             isInRestGracePeriod = false;
             restGraceSecondsRemaining = 0;
 
             if (currentUserId == 0 || currentHabitId == 0)
             {
-                RestStatusText.Visibility = Visibility.Collapsed;
+                RestStatusText.Visibility = Visibility.Hidden;
                 return;
             }
 
@@ -501,6 +518,9 @@ namespace PausaVital.Views
 
         private void OnMainWindowClosed(object? sender, EventArgs e)
         {
+            exerciseWindow?.Close();
+            exerciseWindow = null;
+
             idleTimer.Stop();
             reconnectTimer.Stop();
             hydrationTimer.Stop();

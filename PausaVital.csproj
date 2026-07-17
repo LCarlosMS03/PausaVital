@@ -20,10 +20,17 @@
   </ItemGroup>
 
   <ItemGroup>
+
+	<!-- Todos los ejercicios se incrustan como recursos WPF -->
+    <None Remove="Assets\Exercises\*.png" />
+	<Resource Include="Assets\Exercises\*.png" />
+
+	 <!-- Iconos -->
     <None Remove="Assets\Icons\Exit.ico" />
     <None Remove="Assets\Icons\PausaVital.ico" />
     <None Remove="Assets\Icons\ShowPanel.ico" />
     <None Remove="Assets\Icons\statistics.ico" />
+    
     <Resource Include="Assets\Icons\Exit.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

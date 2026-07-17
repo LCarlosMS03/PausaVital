@@ -1,0 +1,39 @@
+﻿<Window x:Class="PausaVital.Views.ExerciseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ejercicio recomendado"
+        Height="450"
+        Width="400"
+        WindowStartupLocation="Manual"
+        ResizeMode="NoResize">
+
+    <Grid Margin="15">
+
+        <StackPanel>
+
+            <TextBlock Text="Ejercicio recomendado"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,15"/>
+
+            <Image x:Name="ExerciseImage"
+                   Height="220"
+                   Stretch="Uniform"/>
+
+            <TextBlock x:Name="ExerciseTitle"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       TextAlignment="Center"
+                       Margin="0,15,0,10"/>
+
+            <TextBlock x:Name="ExerciseDescription"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       Margin="10"/>
+
+        </StackPanel>
+
+    </Grid>
+</Window>
+    

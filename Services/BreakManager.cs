@@ -5,8 +5,12 @@ namespace PausaVital.Services
     public class BreakManager
     {
         private TimeSpan workThreshold = TimeSpan.FromMinutes(20);
-        private static readonly TimeSpan ActiveThreshold = TimeSpan.FromSeconds(30);
-        private static readonly TimeSpan LongIdleResetThreshold = TimeSpan.FromMinutes(5);
+
+        private static readonly TimeSpan ActiveThreshold =
+            TimeSpan.FromSeconds(30);
+
+        private static readonly TimeSpan LongIdleResetThreshold =
+            TimeSpan.FromMinutes(5);
 
         private TimeSpan workTime = TimeSpan.Zero;
 
@@ -18,15 +22,20 @@ namespace PausaVital.Services
             {
                 workThreshold = TimeSpan.FromMinutes(25);
             }
-            else
+            else if (mode == "20-20-20")
             {
                 workThreshold = TimeSpan.FromMinutes(20);
             }
         }
 
-        public bool ShouldTakeBreak(TimeSpan idleTime, TimeSpan elapsed)
+        public bool ShouldTakeBreak(
+            TimeSpan idleTime,
+            TimeSpan elapsed)
         {
-            if (elapsed <= TimeSpan.Zero) return false;
+            if (elapsed <= TimeSpan.Zero)
+            {
+                return false;
+            }
 
             if (idleTime >= LongIdleResetThreshold)
             {
@@ -48,4 +57,5 @@ namespace PausaVital.Services
             return true;
         }
     }
+
 }
