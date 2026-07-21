@@ -19,7 +19,6 @@ El proyecto emplea una arquitectura híbrida que separa la capa de presentación
 * **Frontend:** Desarrollado en **C# con .NET 8 (WPF)**, ofreciendo un consumo de recursos mínimo y una integración visual nativa con Windows.
 * **Backend:** Microservicio local construido en **Python (FastAPI)**, incrustado en el ensamblado principal como un *Embedded Resource*.
 * **Base de Datos:** El servicio de DB funciona localmente con **Python (SQLite)**, respetando el pensamiento "Local-First".
-* **Estandarización:** Para mantener la coherencia técnica y las mejores prácticas de la industria, toda la base de código, el entorno, las variables y las transacciones de base de datos están programadas íntegramente en Inglés.
 
 ## Instalación y Despliegue
 
