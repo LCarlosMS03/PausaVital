@@ -446,21 +446,31 @@ namespace PausaVital.Views
             }
 
             bool recorded = await apiService.RecordBreakAsync(
-                currentUserId,
-                currentHabitId,
-                "completed");
+    currentUserId,
+    currentHabitId,
+    "completed");
 
-            if (!recorded)
+            if (recorded)
             {
-                return;
+                int shieldsBefore = cachedShields;
+
+                await UpdateStreakAndShieldsAsync();
+
+                if (cachedShields > shieldsBefore)
+                {
+                    App.TrayManager?.ShowNotification(
+                        "¡Nuevo escudo obtenido!",
+                        $"Completaste {cachedStreak} descansos consecutivos y ganaste un escudo. Ahora tienes {cachedShields}.");
+                }
+                else
+                {
+                    App.TrayManager?.ShowNotification(
+                        "Descanso completado",
+                        "¡Buen trabajo! Tu racha fue actualizada.");
+                }
+
+                ShowPendingHydration();
             }
-
-            await UpdateStreakAndShieldsAsync();
-
-
-            App.TrayManager?.ShowNotification(
-                "Descanso completado",
-                "¡Buen trabajo! Tu racha fue actualizada.");
         }
 
         private async Task HandleFailedRestAsync()

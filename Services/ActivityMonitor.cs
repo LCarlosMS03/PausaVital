@@ -17,9 +17,7 @@ namespace PausaVital.Services
         [DllImport("user32.dll")]
         private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
 
-        /// <summary>
         /// Calculates the total time the user has been completely idle (no mouse/keyboard).
-        /// </summary>
         public static TimeSpan GetIdleTime()
         {
             LASTINPUTINFO lastInput = new LASTINPUTINFO
