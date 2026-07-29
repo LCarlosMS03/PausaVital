@@ -56,7 +56,7 @@ namespace PausaVital.Views
 
             hydrationTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(30)
+                Interval = TimeSpan.FromMinutes(1)
             };
             hydrationTimer.Tick += OnHydrationTimerTicked;
             hydrationTimer.Start();

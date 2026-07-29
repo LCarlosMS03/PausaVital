@@ -4,7 +4,7 @@
         Title="Ejercicio recomendado"
         Height="450"
         Width="400"
-        WindowStartupLocation="Manual"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
 
     <Grid Margin="15">
