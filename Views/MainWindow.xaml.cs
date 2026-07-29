@@ -56,7 +56,7 @@ namespace PausaVital.Views
 
             hydrationTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromHours(1)
+                Interval = TimeSpan.FromSeconds(30)
             };
             hydrationTimer.Tick += OnHydrationTimerTicked;
             hydrationTimer.Start();
@@ -195,7 +195,7 @@ namespace PausaVital.Views
             }
 
             breakManager.SetMode(mode);
-            restDurationSeconds = mode == "Pomodoro" ? 300 : 20;
+            restDurationSeconds = mode == "Pomodoro" ? 5 : 5;
 
             UpdateConnectionUI(
                 "Iniciando conexión...",

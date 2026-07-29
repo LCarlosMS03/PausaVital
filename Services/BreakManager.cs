@@ -20,11 +20,11 @@ namespace PausaVital.Services
         {
             if (mode == "Pomodoro")
             {
-                workThreshold = TimeSpan.FromMinutes(25);
+                workThreshold = TimeSpan.FromSeconds(10);
             }
             else if (mode == "20-20-20")
             {
-                workThreshold = TimeSpan.FromMinutes(20);
+                workThreshold = TimeSpan.FromSeconds(10);
             }
         }
 
